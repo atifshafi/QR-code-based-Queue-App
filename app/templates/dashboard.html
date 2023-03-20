@@ -1,0 +1,33 @@
+<div class='container'>
+  <h1 class='text-center'>Admin Dashboard</h1>
+  <p class='text-center'>Manage the queue system here.</p>
+  <div class='table-responsive'>
+    <table class='table table-striped'>
+      <thead>
+      <tr>
+        <th scope='col'>#</th>
+        <th scope='col'>Name</th>
+        <th scope='col'>Phone Number</th>
+        <th scope='col'>Selected Image</th>
+        <th scope='col'>Estimated Wait Time</th>
+        <th scope='col'>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for customer in customers %}
+      <tr>
+        <th scope='row'>{{ loop.index }}</th>
+        <td>{{ customer.name }}</td>
+        <td>{{ customer.phone }}</td>
+        <td>{{ customer.selected_image.title if customer.selected_image else 'None' }}</td>
+        <td>{{ customer.estimated_wait_time }} minutes</td>
+        <td>
+          <button class='btn btn-primary btn-sm notify-customer' data-customer-id='{{ customer.id }}'>Notify</button>
+          <button class='btn btn-danger btn-sm remove-customer' data-customer-id='{{ customer.id }}'>Remove</button>
+        </td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>

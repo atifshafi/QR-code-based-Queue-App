@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+  <meta charset='UTF-8'>
+  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+  <title>Customers</title>
+  <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css'>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css' rel='stylesheet' />
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.9.0/mdb.min.css' rel='stylesheet' />
+  <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
+  <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.9.0/mdb.min.js'></script>
+  <style>
+      .container {
+          margin-top: 30px;
+      }
+  </style>
+
+</head>
+
+<body>
+<header>
+  <nav class='navbar navbar-expand-lg navbar-light bg-light'>
+    <div class='container-fluid'>
+      <ul class='navbar-nav'>
+        <li class='nav-item'>
+          <a class='nav-link font-weight-bold' href='/welcome'>Home</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+<div class='container'>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class='row'>
+    <div class='col s12'>
+      {% for category, message in messages %}
+      <div
+        class="card-panel {% if category == 'success' %}green{% elif category == 'danger' %}red{% else %}blue{% endif %} lighten-1 white-text">
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+  {% endwith %}
+
+  <h2 class='center-align'>Customers</h2>
+  <form id='customerListForm' method='POST'>
+    <table class='striped highlight centered responsive-table'>
+      <thead>
+      <tr>
+        <th>
+          <label>
+            <input type='checkbox' id='selectAll' />
+            <span>Select</span>
+          </label>
+        </th>
+        <th>Name</th>
+        <th>Phone</th>
+      </tr>
+      </thead>
+      <tbody>
+      {% for customer in customers %}
+      <tr>
+        <td>
+          <label>
+            <input type='checkbox' class='single-checkbox' name='customer_ids' value='{{ customer._id }}' />
+            <span></span>
+          </label>
+        </td>
+        <td>{{ customer.name }}</td>
+        <td>{{ customer.phone }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <button type='submit' formaction='/remove_customers' class='btn red waves-effect waves-light'
+            id='removeSelectedCustomers'>Remove Selected
+    </button>
+    <button type='submit' formaction='/send_sms_to_customers' class='btn blue waves-effect waves-light'
+            id='sendSMSToSelectedCustomers'>Send SMS to Selected
+    </button>
+  </form>
+</div>
+
+<script src='https://code.jquery.com/jquery-3.6.0.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js'></script>
+<script>
+  $(document).ready(function() {
+    $('#selectAll').change(function() {
+      $('.single-checkbox').prop('checked', $(this).prop('checked'))
+    })
+
+    $('.single-checkbox').change(function() {
+      if ($('.single-checkbox:checked').length == $('.single-checkbox').length) {
+        $('#selectAll').prop('checked', true)
+      } else {
+        $('#selectAll').prop('checked', false)
+      }
+    })
+  })
+</script>
+</body>
+
+</html>
+
+

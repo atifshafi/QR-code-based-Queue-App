@@ -1,0 +1,67 @@
+/* Custom CSS */
+body {
+  font-family: 'Arial', sans-serif;
+}
+
+header {
+  margin-bottom: 2rem;
+}
+
+h1, h2 {
+  font-weight: bold;
+}
+
+.card {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.3s ease;
+}
+
+.card:hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.flash-message-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 1rem auto;
+  max-width: 600px;
+}
+
+.flash-message {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+  text-align: center;
+}
+
+.flash-message-error {
+  background-color: #ffe0e0;
+  border-color: #ffbbbb;
+  color: #cc0000;
+}
+
+.flash-message-success {
+  background-color: #e0ffe0;
+  border-color: #bbffbb;
+  color: #008800;
+}
+
+.flash-message-info {
+  background-color: #e0e0ff;
+  border-color: #bbbbff;
+  color: #000088;
+}
+
+.flash-message-warning {
+  background-color: #ffffe0;
+  border-color: #ffffbb;
+  color: #886800;
+}
+
+.select-image {
+  width: 100%;
+}

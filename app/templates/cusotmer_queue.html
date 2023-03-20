@@ -1,0 +1,15 @@
+<!-- Add this script tag to your customer_queue.html -->
+<script>
+    function updatePosition() {
+        fetch('/get_position')
+            .then(response => response.json())
+            .then(data => {
+                // Update the position display here
+            });
+
+        // Schedule the next update in 10 seconds
+        setTimeout(updatePosition, 10000);
+    }
+
+    updatePosition(); // Start updating the position
+</script>

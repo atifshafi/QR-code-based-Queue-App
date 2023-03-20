@@ -1,0 +1,17 @@
+<div class='container'>
+  <h1 class='text-center'>Scan QR Code</h1>
+  <p class='text-center'>Scan the QR code to join the queue and enter your information.</p>
+  <div class='text-center'>
+    <video id='qr-video' width='320' height='240'></video>
+  </div>
+  <script src='https://unpkg.com/qr-scanner@latest/build/qr-scanner.min.js'></script>
+  <script>
+    const videoElem = document.getElementById('qr-video')
+    const qrScanner = new QrScanner(videoElem, result => {
+      qrScanner.stop()
+      location.href = result
+    })
+
+    qrScanner.start()
+  </script>
+</div>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image Gallery</title>
+  <!-- Include necessary CSS and JavaScript files here -->
+</head>
+<body>
+<h1>Image Gallery</h1>
+<div id='image-gallery'>
+  {% for image in images %}
+  <div class='image-container'>
+    <img src='{{ image.url }}' alt='{{ image.title }}' />
+    <button class='select-image' data-image-id='{{ image.id }}'>Select</button>
+  </div>
+  {% endfor %}
+</div>
+<script>
+  document.querySelectorAll('.select-image').forEach(function(button) {
+    button.addEventListener('click', function() {
+      const imageId = button.getAttribute('data-image-id')
+
+      // Send a request to the server to associate the selected image with the customer
+      fetch('/select_image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          image_id: imageId
+        })
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert('Image selected successfully.')
+          } else {
+            alert('An error occurred while selecting the image. Please try again.')
+          }
+        })
+    })
+  })
+
+</script>
+</body>
+</html>

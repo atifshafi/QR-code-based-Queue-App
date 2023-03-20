@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mehndi Queue App</title>
+  <meta name='viewport' content='width=device-width, initial-scale=1, shrink-to-fit=no'>
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css' rel='stylesheet' />
+  <link href='https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.9.0/mdb.min.css' rel='stylesheet' />
+  <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
+  <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css' rel='stylesheet'>
+  <link href='https://unpkg.com/swiper/swiper-bundle.min.css' rel='stylesheet' />
+  <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.0/css/all.min.css'>
+  <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.9.0/mdb.min.js'></script>
+  <script src='https://unpkg.com/swiper/swiper-bundle.min.js'></script>
+  <style>
+      body.main-background {
+          background-image: url('https://img.freepik.com/free-vector/abstract-elegant-luxury-beautiful-background_1055-7213.jpg?w=2000');
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+      }
+
+      body {
+          overflow-x: hidden;
+      }
+
+      img.welcome-image {
+          width: 300px;
+          height: 300px;
+          object-fit: cover;
+      }
+
+      img.fixed-size {
+          width: 275px;
+          height: 275px;
+          object-fit: cover;
+          object-position: center;
+      }
+
+      #image-gallery {
+          margin-bottom: 50px; /* Adjust this value to increase or decrease the gap */
+      }
+
+      .card .card-img-container {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100%;
+      }
+
+      /* Swiper Styles */
+      .swiper-container {
+          width: 100%;
+          height: 100%;
+      }
+
+      .swiper-slide {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          padding-left: 5px;
+          padding-right: 5px;
+      }
+
+      /* Stylized navigation buttons */
+      .swiper-button-next,
+      .swiper-button-prev {
+          color: #007bff;
+          background-color: rgba(255, 255, 255, 0.75);
+          width: 15px;
+          height: 35px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          position: absolute;
+          transform: translateY(-50%);
+          top: 80%; /* Change this value to adjust the vertical position of the buttons */
+      }
+
+      .swiper-button-next {
+          right: 15px;
+      }
+
+      .swiper-button-prev {
+          left: 15px;
+      }
+
+      /* Button hover effect */
+      .swiper-button-next:hover,
+      .swiper-button-prev:hover {
+          background-color: rgba(255, 255, 255, 1);
+      }
+
+      .page-footer {
+          background-color: #333;
+          color: #fff;
+          padding: 30px 0;
+      }
+
+      .page-footer a {
+          color: #fff;
+          text-decoration: none;
+      }
+
+      .page-footer a:hover {
+          color: #ccc;
+      }
+
+      .contact-title {
+          font-size: 20px;
+          margin-bottom: 20px;
+      }
+
+      .footer-icon {
+          display: inline-block;
+          vertical-align: middle;
+      }
+
+      .footer-text {
+          display: inline-block;
+          vertical-align: middle;
+          margin-left: 10px;
+      }
+
+      .footer-item {
+          margin-bottom: 10px;
+      }
+
+      .footer-divider {
+          background-color: #555;
+          height: 2px;
+          width: 70px;
+          margin-bottom: 20px;
+      }
+  </style>
+</head>
+
+<body class='main-background'>
+<header>
+  <nav class='navbar navbar-expand-lg navbar-light bg-light'>
+    <div class='container-fluid'>
+      <ul class='navbar-nav'>
+        <li class='nav-item'>
+          <a class='nav-link font-weight-bold' href='/customers'>Customers</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class='container my-5'>
+    <div class='text-center mb-4'>
+      <img src="{{ url_for('static', filename='image/welcome_image.jpg') }}" alt='Welcome' class='welcome-image'>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class='flash-message-container'>
+      {% for category, message in messages %}
+      <div class='alert alert-{{ category }} mt-3' role='alert'>
+        {{ message }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+  </section>
+
+
+  <section id='image-gallery' class='container'>
+    <h2 class='text-center mb-4'>Image Gallery</h2>
+    <p class='text-center mb-5'>Browse through our collection of images.</p>
+    <!-- Initialize Swiper -->
+    <div class='swiper-container'>
+      <div class='swiper-wrapper'>
+        {% for image in images %}
+        <div class='swiper-slide'>
+          <div class='card'>
+            <div class='card-img-container'>
+              <img src="{{ url_for('static', filename=image.url) }}" class='card-img-top fixed-size'
+                   alt='{{ image.title }}'>
+            </div>
+            <div class='card-body'>
+              <h5 class='card-title text-center'>{{ image.title }}</h5>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <!-- Add Navigation -->
+      <div class='swiper-button-next'></div>
+      <div class='swiper-button-prev'></div>
+    </div>
+  </section>
+  <!-- Add footer -->
+  <footer class='page-footer font-small unique-color-dark pt-4'>
+    <div class='container text-center text-md-left'>
+      <div class='row mt-3'>
+        <div class='col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4'>
+          <h6 class='text-uppercase font-weight-bold contact-title'>Contact</h6>
+          <hr class='footer-divider'>
+          <div class='footer-item'>
+            <a href='https://www.instagram.com/basus_mehndi_art/' target='_blank' rel='noopener noreferrer'>
+              <i class='fab fa-instagram footer-icon'></i>
+              <span class='footer-text'>basus_mehndi_art</span>
+            </a>
+          </div>
+          <div class='footer-item'>
+            <a href='https://www.instagram.com/henna_by_naba/' target='_blank' rel='noopener noreferrer'>
+              <i class='fab fa-instagram footer-icon'></i>
+              <span class='footer-text'>henna_by_naba</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</main>
+</body>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const swiper = new Swiper('.swiper-container', {
+      slidesPerView: 6, // Increase this value to display more images per view
+      spaceBetween: 10, // Decrease this value to reduce the gap between images
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev'
+      },
+      breakpoints: {
+        640: {
+          slidesPerView: 2,
+          spaceBetween: 5 // Decrease this value to reduce the gap between images on smaller screens
+        },
+        1024: {
+          slidesPerView: 3, // Increase this value to display more images per view on larger screens
+          spaceBetween: 8 // Decrease this value to reduce the gap between images on larger screens
+        }
+      }
+    })
+  })
+</script>
+
+</html>
+
+
