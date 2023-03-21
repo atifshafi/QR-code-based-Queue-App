@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, get_flashed_messages
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, get_flashed_messages, Response
 from flask_sqlalchemy import SQLAlchemy
 from twilio.rest import Client
 from datetime import timedelta
+# from flask_migrate import Migrate
 from werkzeug.security import generate_password_hash, check_password_hash
 # from models import db, Customer, Image
 from functools import wraps
@@ -17,12 +18,23 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
+# migrate = Migrate(app, db)
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+
+# class Image(db.Model):
+#     _id = db.Column(db.Integer, primary_key=True)
+#     title = db.Column(db.String(100), nullable=False)
+#     url = db.Column(db.String(255), nullable=False)
 
 
 class Image(db.Model):
     _id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
-    url = db.Column(db.String(255), nullable=False)
+    data = db.Column(db.LargeBinary, nullable=False)
+    mimetype = db.Column(db.String(100), nullable=False)
+
 
 
 class Customer(db.Model):
@@ -135,6 +147,12 @@ def customers():
     return render_template('customers.html', customers=customers)
 
 
+@app.route('/image/<int:image_id>')
+def serve_image(image_id):
+    image = Image.query.get_or_404(image_id)
+    return Response(image.data, content_type=image.mimetype)
+
+
 @app.route('/remove_customers', methods=['POST'])
 def remove_customers():
     customer_ids = request.form.getlist('customer_ids')
@@ -145,6 +163,40 @@ def remove_customers():
             db.session.commit()
     flash('Selected customers removed from the queue', 'success')
     return redirect(url_for('customers'))
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+@app.route('/upload_image', methods=['GET', 'POST'])
+def upload_image():
+    print('test')
+    if request.method == 'POST':
+        print('test2')
+        if 'image' not in request.files:
+            flash('No image file found', 'danger')
+            return redirect(request.url)
+
+        image_file = request.files['image']
+        if image_file.filename == '':
+            flash('No image file selected', 'danger')
+            return redirect(request.url)
+
+        if image_file and allowed_file(image_file.filename):
+            print('test3')
+            image_title = request.form['title']
+            image_mimetype = image_file.mimetype
+
+            new_image = Image(title=image_title, data=image_file.read(), mimetype=image_mimetype)
+            db.session.add(new_image)
+            db.session.commit()
+            flash('Image uploaded successfully', 'success')
+            return redirect(url_for('welcome'))
+        else:
+            flash('Invalid file type', 'danger')
+
+    return render_template('welcome.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -181,24 +233,24 @@ def login():
 #     return render_template('register.html')
 
 
-def add_sample_images():
-    sample_images = [
-        {'title': 'Style 1', 'filename': 'sample1.jpg'},
-        {'title': 'Style 2', 'filename': 'sample2.jpg'},
-        {'title': 'Style 3', 'filename': 'sample3.jpg'},
-        {'title': 'Style 4', 'filename': 'sample4.jpg'},
-        {'title': 'Style 5', 'filename': 'sample5.jpg'},
-        {'title': 'Style 6', 'filename': 'sample6.jpg'},
-        {'title': 'Style 7', 'filename': 'sample7.jpg'}
-    ]
-
-    for image in sample_images:
-        img = Image.query.filter_by(title=image['title']).first()
-        if img is None:
-            new_image = Image(title=image['title'], url=f"image/gallery/{image['filename']}")
-            print(new_image)
-            db.session.add(new_image)
-            db.session.commit()
+# def add_sample_images():
+#     sample_images = [
+#         {'title': 'Style 1', 'filename': 'sample1.jpg'},
+#         {'title': 'Style 2', 'filename': 'sample2.jpg'},
+#         {'title': 'Style 3', 'filename': 'sample3.jpg'},
+#         {'title': 'Style 4', 'filename': 'sample4.jpg'},
+#         {'title': 'Style 5', 'filename': 'sample5.jpg'},
+#         {'title': 'Style 6', 'filename': 'sample6.jpg'},
+#         {'title': 'Style 7', 'filename': 'sample7.jpg'}
+#     ]
+#
+#     for image in sample_images:
+#         img = Image.query.filter_by(title=image['title']).first()
+#         if img is None:
+#             new_image = Image(title=image['title'], url=f"image/gallery/{image['filename']}")
+#             print(new_image)
+#             db.session.add(new_image)
+#             db.session.commit()
 
 
 @app.route('/get_position')
@@ -226,11 +278,6 @@ def dashboard():
     queue_data = db.session.query(Customer).all()
     return render_template('dashboard.html', queue=queue_data)
 
-
-@app.route('/gallery')
-def gallery():
-    images = Image.query.all()
-    return render_template('gallery.html', images=images)
 
 
 @app.route('/select_image', methods=['POST'])
@@ -364,6 +411,6 @@ def logout():
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-        add_sample_images()
+        # add_sample_images()
     app.run(debug=True, port=5001)
 
