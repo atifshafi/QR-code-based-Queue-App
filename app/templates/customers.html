@@ -12,9 +12,53 @@
   <link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'>
   <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/3.9.0/mdb.min.js'></script>
   <style>
+      body {
+          background-color: #121212;
+          color: #ffffff;
+      }
+
+      .navbar {
+          background-color: #1e1e1e;
+      }
+
+      .nav-link {
+          color: #ffffff;
+      }
+
+      .nav-link:hover {
+          color: #bbbbbb;
+      }
+
       .container {
           margin-top: 30px;
       }
+
+      .card-panel {
+          background-color: #1e1e1e;
+      }
+
+      .striped > tbody > tr:nth-child(odd) > td,
+      .striped > tbody > tr:nth-child(odd) > th {
+          background-color: #222222;
+      }
+
+      .striped > tbody > tr:nth-child(even) > td,
+      .striped > tbody > tr:nth-child(even) > th {
+          background-color: #1e1e1e;
+      }
+
+      .striped > thead > tr > th {
+          color: #ffffff;
+      }
+
+      .btn {
+          background-color: #424242;
+      }
+
+      .btn:hover {
+          background-color: #616161;
+      }
+
   </style>
 
 </head>
@@ -77,12 +121,19 @@
       {% endfor %}
       </tbody>
     </table>
-    <button type='submit' formaction='/remove_customers' class='btn red waves-effect waves-light'
-            id='removeSelectedCustomers'>Remove Selected
-    </button>
-    <button type='submit' formaction='/send_sms_to_customers' class='btn blue waves-effect waves-light'
-            id='sendSMSToSelectedCustomers'>Send SMS to Selected
-    </button>
+<!--    <button type='submit' formaction='/remove_customers' class='btn red waves-effect waves-light'-->
+<!--            id='removeSelectedCustomers'>Remove Selected-->
+<!--    </button>-->
+<!--    <button type='submit' formaction='/send_sms_to_customers' class='btn blue waves-effect waves-light'-->
+<!--            id='sendSMSToSelectedCustomers'>Send SMS to Selected-->
+<!--    </button>-->
+
+      <button type='button' onclick='handleButtonClick("/remove_customers")' class='btn red waves-effect waves-light'
+          id='removeSelectedCustomers'>Remove Selected
+  </button>
+  <button type='button' onclick='handleButtonClick("/send_sms_to_customers")' class='btn blue waves-effect waves-light'
+          id='sendSMSToSelectedCustomers'>Send SMS to Selected
+  </button>
   </form>
 </div>
 
@@ -102,6 +153,14 @@
       }
     })
   })
+
+  function handleButtonClick(action) {
+    if ($('.single-checkbox:checked').length === 0) {
+      M.toast({html: 'Please select the customer/s', classes: 'red'});
+    } else {
+      $('#customerListForm').attr('action', action).submit();
+    }
+  }
 </script>
 </body>
 
