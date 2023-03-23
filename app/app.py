@@ -1,4 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, get_flashed_messages, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, get_flashed_messages, \
+    Response
 from flask_sqlalchemy import SQLAlchemy
 from twilio.rest import Client
 from datetime import timedelta
@@ -18,15 +19,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
-# migrate = Migrate(app, db)
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-
-# class Image(db.Model):
-#     _id = db.Column(db.Integer, primary_key=True)
-#     title = db.Column(db.String(100), nullable=False)
-#     url = db.Column(db.String(255), nullable=False)
 
 
 class Image(db.Model):
@@ -34,7 +28,6 @@ class Image(db.Model):
     title = db.Column(db.String(100), nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
     mimetype = db.Column(db.String(100), nullable=False)
-
 
 
 class Customer(db.Model):
@@ -216,7 +209,6 @@ def login():
     return render_template('login.html')
 
 
-
 # @app.route('/register', methods=['GET', 'POST'])
 # def register():
 #     if request.method == 'POST':
@@ -277,7 +269,6 @@ def dashboard():
     # Fetch the queue data from the database and render the dashboard
     queue_data = db.session.query(Customer).all()
     return render_template('dashboard.html', queue=queue_data)
-
 
 
 @app.route('/select_image', methods=['POST'])
@@ -413,4 +404,3 @@ if __name__ == '__main__':
         db.create_all()
         # add_sample_images()
     app.run(debug=True, port=5001)
-
