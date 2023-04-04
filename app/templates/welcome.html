@@ -50,7 +50,7 @@
           right: 0;
           bottom: 0;
           width: 100%; /* Add this line */
-          height: 100%; /* Add this line */
+          height: 130%; /* Add this line */
           background-image: url('static/image/overlay-image.png');
           background-position: center;
           background-repeat: no-repeat;
@@ -110,8 +110,8 @@
 
 
       img.fixed-size {
-          width: 275px;
-          height: 275px;
+          width: 350px;
+          height: 350px;
           object-fit: cover;
           object-position: center;
       }
@@ -390,20 +390,20 @@
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const swiper = new Swiper('.swiper-container', {
-      slidesPerView: 6, // Increase this value to display more images per view
-      spaceBetween: 10, // Decrease this value to reduce the gap between images
+      slidesPerView: 6, // Adjust this value to display more or fewer images per view
+      spaceBetween: 15, // Adjust this value to change the gap between images
       navigation: {
         nextEl: '.swiper-button-next',
         prevEl: '.swiper-button-prev'
       },
       breakpoints: {
         640: {
-          slidesPerView: 2,
-          spaceBetween: 5 // Decrease this value to reduce the gap between images on smaller screens
+          slidesPerView: 1,
+          spaceBetween: 10 // Adjust this value to change the gap between images on smaller screens
         },
         1024: {
-          slidesPerView: 3, // Increase this value to display more images per view on larger screens
-          spaceBetween: 8 // Decrease this value to reduce the gap between images on larger screens
+          slidesPerView: 2, // Adjust this value to display more or fewer images per view on larger screens
+          spaceBetween: 10 // Adjust this value to change the gap between images on larger screens
         }
       }
     })

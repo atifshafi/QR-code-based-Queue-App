@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queue-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: queue-app
+  template:
+    metadata:
+      labels:
+        app: queue-app
+    spec:
+      containers:
+      - name: queue-app
+        image: 750267477682.dkr.ecr.ca-central-1.amazonaws.com/qr-code-queue-app:latest
+        ports:
+        - containerPort: 5001
+        envFrom:
+        - secretRef:
+            name: queue-app-secrets

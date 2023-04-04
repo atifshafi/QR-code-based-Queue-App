@@ -1,0 +1,7 @@
+__pycache__
+*.pyc
+*.pyo
+*.log
+*.tar.gz
+atif-key.pem
+push_to_ecr.sh

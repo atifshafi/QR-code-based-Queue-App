@@ -4,18 +4,24 @@ from flask_sqlalchemy import SQLAlchemy
 from twilio.rest import Client
 from datetime import timedelta
 # from flask_migrate import Migrate
-from werkzeug.security import generate_password_hash, check_password_hash
 # from models import db, Customer, Image
 from functools import wraps
 import os
+from dotenv import load_dotenv
+import mysql.connector
+from mysql.connector import Error
 
-account_sid = "AC3d04ca0450dbaa53d8584db2b1c3086c"  # Replace with your Twilio Account SID
-auth_token = "74f78a9eba3f7b9a25f063bde6a413e3"  # Replace with your Twilio Auth Token
-twilio_phone_number = "+15076973994"
+# Load the environment variables from the .env file
+load_dotenv()
+
+account_sid = os.environ.get("TWILIO_ACCOUNT_SID")
+auth_token = os.environ.get("TWILIO_AUTH_TOKEN")
+twilio_phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'mysecretkey'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqldb://admin:atif_rds@database-1.cxxoq4akoogy.ca-central-1.rds.amazonaws.com:3306/database-1'
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
@@ -84,11 +90,11 @@ def validation():
         client = Client(account_sid, auth_token)
         try:
             print("Sending message...")
-            # message = client.messages.create(
-            #     body=message_body,
-            #     from_=twilio_phone_number,
-            #     to=phone_number
-            # )
+            message = client.messages.create(
+                body=message_body,
+                from_=twilio_phone_number,
+                to=phone_number
+            )
             # Calculate the estimated wait time based on number of customers in the queue, assuming average wait time is 15 minutes
             wait_time = 15 * Customer.query.count()
             flash(f'Thank you {name} for joining the queue. Your estimated wait time is {wait_time} minutes.',
@@ -207,43 +213,6 @@ def login():
             flash('Incorrect passcode! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
     return render_template('login.html')
-
-
-# @app.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         email = request.form['email']
-#         password = request.form['password']
-#         hashed_password = generate_password_hash(password, method='sha256')
-#
-#         new_user = User(email=email, password=hashed_password)
-#         db.session.add(new_user)
-#         db.session.commit()
-#         flash('Registration successful', 'success')
-#         return redirect(url_for('login'))
-#
-#     return render_template('register.html')
-
-
-# def add_sample_images():
-#     sample_images = [
-#         {'title': 'Style 1', 'filename': 'sample1.jpg'},
-#         {'title': 'Style 2', 'filename': 'sample2.jpg'},
-#         {'title': 'Style 3', 'filename': 'sample3.jpg'},
-#         {'title': 'Style 4', 'filename': 'sample4.jpg'},
-#         {'title': 'Style 5', 'filename': 'sample5.jpg'},
-#         {'title': 'Style 6', 'filename': 'sample6.jpg'},
-#         {'title': 'Style 7', 'filename': 'sample7.jpg'}
-#     ]
-#
-#     for image in sample_images:
-#         img = Image.query.filter_by(title=image['title']).first()
-#         if img is None:
-#             new_image = Image(title=image['title'], url=f"image/gallery/{image['filename']}")
-#             print(new_image)
-#             db.session.add(new_image)
-#             db.session.commit()
-
 
 @app.route('/get_position')
 def get_position():
@@ -392,6 +361,28 @@ def send_message():
     flash('Message sent to the customer', 'success')
     return redirect(url_for('dashboard'))
 
+def create_database():
+    try:
+        connection = mysql.connector.connect(
+            host='database-1.cxxoq4akoogy.ca-central-1.rds.amazonaws.com',
+            user='admin',
+            password='atif_rds'
+        )
+
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute("CREATE DATABASE IF NOT EXISTS `database-1` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+            connection.commit()
+            print("Database created successfully")
+
+    except Error as e:
+        print("Error while connecting to MySQL", e)
+
+    finally:
+        if connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection is closed")
 
 @app.route('/logout')
 def logout():
@@ -400,7 +391,8 @@ def logout():
 
 
 if __name__ == '__main__':
+    create_database()
     with app.app_context():
         db.create_all()
-        # add_sample_images()
-    app.run(debug=True, port=5001)
+    app.run(debug=True, host='0.0.0.0', port=5001)
+

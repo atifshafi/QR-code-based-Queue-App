@@ -1,3 +1,6 @@
-flask
-flask_sqlalchemy
+Flask
+Flask-SQLAlchemy
 twilio
+mysqlclient
+mysql-connector-python
+python-dotenv
