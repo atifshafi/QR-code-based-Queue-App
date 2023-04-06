@@ -1,0 +1,45 @@
+name: Deploy to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Decode EC2 private key
+        run: |
+          echo "${{ secrets.EC2_PRIVATE_KEY_BASE64 }}" | base64 --decode > my_decoded_private_key.pem
+          chmod 600 my_decoded_private_key.pem
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.login-ecr.outputs.registry }}/queue-app:latest
+
+      - name: Install AWS CLI
+        run: sudo apt-get install -y awscli
+
+      - name: Deploy to EC2 instance
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          INSTANCE_ID: ${{ secrets.INSTANCE_ID }}
+        run: |
+          PRIVATE_KEY_FILE=my_decoded_private_key.pem
+          USER=ec2-user
+          REMOTE_DOCKER_HOST=$USER@$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[].Instances[].PublicDnsName' --output text)
+          scp -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./.docker/ $REMOTE_DOCKER_HOST:/tmp
+          ssh -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $REMOTE_DOCKER_HOST "sudo docker pull ${{ steps.login-ecr.outputs.registry }}/queue-app:latest && sudo docker stop queue-app && sudo docker rm queue-app && sudo docker run -d --name queue-app -p 80:5000 ${{ steps.login-ecr.outputs.registry }}/queue-app:latest"

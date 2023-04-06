@@ -15,13 +15,14 @@
           background-repeat: no-repeat;
           background-size: cover;
       }
+
       body {
           background-color: #f8f9fa;
       }
 
       .container {
           max-width: 500px;
-          margin-top: 100px;
+          margin-top: 50px;
           padding: 20px;
           background-color: white;
           border-radius: 10px;
@@ -29,6 +30,7 @@
       }
 
       h1 {
+          font-size: 2rem;
           margin-bottom: 20px;
       }
 
@@ -49,11 +51,19 @@
           margin-bottom: 10px;
       }
 
+      .admin-button {
+          background-color: #424242;
+          color: white;
+          display: block;
+          margin: 20px auto;
+          text-align: center;
+      }
+
   </style>
 </head>
 
 <body class='main-background'>
-<a class='nav-link btn waves-effect waves-light' href='/customers' style='background-color: #424242; color: white;'>
+<a class='nav-link btn waves-effect waves-light admin-button' href='/customers'>
   <i class='material-icons left'>person</i>
   Admin
 </a>
@@ -97,10 +107,9 @@
   document.getElementById('customer-form').addEventListener('submit', function(event) {
     const name = document.getElementById('name')
     const phoneNumber = document.getElementById('phone_number')
-
     let isValid = true
 
-    // Validate name
+// Validate name
     if (name.value.trim() === '') {
       name.setCustomValidity('Name is required')
       isValid = false
@@ -108,7 +117,7 @@
       name.setCustomValidity('')
     }
 
-    // Validate phone number
+// Validate phone number
     const phoneNumberPattern = /^(\+?\d{1,4}[\s-]?)?(\d{1,8}[\s-]?){1,7}\d$/
     if (!phoneNumberPattern.test(phoneNumber.value.trim())) {
       phoneNumber.setCustomValidity('Please enter a valid phone number')
@@ -126,4 +135,3 @@
 <script src='https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js'></script>
 </body>
 </html>
-

@@ -3,8 +3,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 from flask_sqlalchemy import SQLAlchemy
 from twilio.rest import Client
 from datetime import timedelta
-# from flask_migrate import Migrate
-# from models import db, Customer, Image
 from functools import wraps
 import os
 from dotenv import load_dotenv
@@ -20,8 +18,8 @@ twilio_phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqldb://admin:atif_rds@database-1.cxxoq4akoogy.ca-central-1.rds.amazonaws.com:3306/database-1'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
