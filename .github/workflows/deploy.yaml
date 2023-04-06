@@ -21,6 +21,8 @@ jobs:
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          aws-region: ca-central-1
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v2
