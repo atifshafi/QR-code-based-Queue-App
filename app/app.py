@@ -18,8 +18,8 @@ twilio_phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI") # Only for local testing
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)

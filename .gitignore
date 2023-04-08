@@ -1,3 +1,4 @@
 *.tar.gz
 atif-key.pem
 push_to_ecr.sh
+instance/
