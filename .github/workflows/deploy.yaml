@@ -55,4 +55,4 @@ jobs:
           echo $PRIVATE_KEY_FILE
           cat $PRIVATE_KEY_FILE
           scp -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./.docker/ $REMOTE_DOCKER_HOST:/tmp
-          ssh -i "atif-key.pem" ec2-user@ec2-3-96-120-242.ca-central-1.compute.amazonaws.com
+          ssh -i $PRIVATE_KEY_FILE ec2-user@ec2-3-96-120-242.ca-central-1.compute.amazonaws.com
