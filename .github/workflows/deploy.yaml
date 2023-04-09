@@ -17,6 +17,7 @@ jobs:
         run: |
           echo "${{ secrets.EC2_PRIVATE_KEY_BASE64 }}" | base64 --decode > my_decoded_private_key.pem
           chmod 600 my_decoded_private_key.pem
+          echo "GITHUB_RUNNER_IP=$(curl -s https://ifconfig.me)" >> $GITHUB_ENV
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -27,10 +28,9 @@ jobs:
 
       - name: Add inbound rule to EC2 security group
         run: |
-          echo "GITHUB_RUNNER_IP=$(curl -s https://ifconfig.me)" >> $GITHUB_ENV
           SECURITY_GROUP_ID=$(aws ec2 describe-instances --instance-ids ${{ secrets.INSTANCE_ID }} --query 'Reservations[].Instances[].SecurityGroups[].GroupId' --output text)
-          aws ec2 authorize-security-group-ingress --group-id $SECURITY_GROUP_ID --protocol tcp --port 22 --cidr $GITHUB_RUNNER_IP/32
-          aws ec2 authorize-security-group-ingress --group-id $SECURITY_GROUP_ID --protocol tcp --port 80 --cidr $GITHUB_RUNNER_IP/32
+          aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 22 --cidr "$GITHUB_RUNNER_IP/32"
+          aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 80 --cidr "$GITHUB_RUNNER_IP/32"
 
       - name: Login to Amazon ECR
         id: login-ecr
