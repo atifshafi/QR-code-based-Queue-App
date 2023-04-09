@@ -58,5 +58,5 @@ jobs:
           PRIVATE_KEY_FILE=my_decoded_private_key.pem
           USER=ec2-user
           REMOTE_DOCKER_HOST=$USER@$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[].Instances[].PublicDnsName' --output text)
-          scp -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./.docker/ $REMOTE_DOCKER_HOST:/tmp
+          scp -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r . $REMOTE_DOCKER_HOST:/tmp
           ssh -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $REMOTE_DOCKER_HOST "sudo docker pull ${{ steps.login-ecr.outputs.registry }}/queue-app:latest && sudo docker stop queue-app && sudo docker rm queue-app && sudo docker run -d --name queue-app -p 80:5001 ${{ steps.login-ecr.outputs.registry }}/queue-app:latest"
