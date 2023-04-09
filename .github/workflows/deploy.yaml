@@ -51,4 +51,4 @@ jobs:
           echo $REMOTE_DOCKER_HOST
           echo $PRIVATE_KEY_FILE
           scp -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./.docker/ $REMOTE_DOCKER_HOST:/tmp
-          ssh -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $REMOTE_DOCKER_HOST "sudo docker pull ${{ steps.login-ecr.outputs.registry }}/queue-app:latest && sudo docker stop queue-app && sudo docker rm queue-app && sudo docker run -d --name queue-app -p 80:5001 ${{ steps.login-ecr.outputs.registry }}/queue-app:latest"
+          ssh -i "atif-key.pem" ec2-user@ec2-3-96-120-242.ca-central-1.compute.amazonaws.com
