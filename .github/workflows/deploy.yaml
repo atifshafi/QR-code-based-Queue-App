@@ -31,6 +31,8 @@ jobs:
           SECURITY_GROUP_ID=$(aws ec2 describe-instances --instance-ids ${{ secrets.INSTANCE_ID }} --query 'Reservations[].Instances[].SecurityGroups[].GroupId' --output text)
           aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 22 --cidr "$GITHUB_RUNNER_IP/32"
           aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 80 --cidr "$GITHUB_RUNNER_IP/32"
+          echo "Waiting 2 minutes for the security group changes to take effect"
+          sleep 120
 
       - name: Login to Amazon ECR
         id: login-ecr
