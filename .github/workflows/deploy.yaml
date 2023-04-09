@@ -17,6 +17,7 @@ jobs:
         run: |
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > my_decoded_private_key.pem
           chmod 600 my_decoded_private_key.pem
+          echo $my_decoded_private_key.pem
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -48,6 +49,7 @@ jobs:
           PRIVATE_KEY_FILE=my_decoded_private_key.pem
           USER=ec2-user
           REMOTE_DOCKER_HOST=$USER@$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[].Instances[].PublicDnsName' --output text)
+          echo $USER
           echo $REMOTE_DOCKER_HOST
           echo $PRIVATE_KEY_FILE
           scp -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r ./.docker/ $REMOTE_DOCKER_HOST:/tmp
