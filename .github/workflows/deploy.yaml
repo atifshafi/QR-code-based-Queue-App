@@ -55,8 +55,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           INSTANCE_ID: ${{ secrets.INSTANCE_ID }}
         run: |
+          set -x
           PRIVATE_KEY_FILE=my_decoded_private_key.pem
           USER=ec2-user
           REMOTE_DOCKER_HOST=$USER@$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[].Instances[].PublicDnsName' --output text)
-          scp -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * $REMOTE_DOCKER_HOST:/tmp
-          ssh -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $REMOTE_DOCKER_HOST "aws ecr get-login-password --region ca-central-1 | sudo docker login --username AWS --password-stdin 750267477682.dkr.ecr.ca-central-1.amazonaws.com && sudo docker pull 750267477682.dkr.ecr.ca-central-1.amazonaws.com/queue-app:latest && (sudo docker stop queue-app && sudo docker rm queue-app || true) && sudo docker run -d --name queue-app -p 80:5001 750267477682.dkr.ecr.ca-central-1.amazonaws.com/queue-app:latest"
+          scp -v -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r * $REMOTE_DOCKER_HOST:/tmp
+          ssh -t -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $REMOTE_DOCKER_HOST "aws ecr get-login-password --region ca-central-1 | sudo docker login --username AWS --password-stdin 750267477682.dkr.ecr.ca-central-1.amazonaws.com && sudo docker pull 750267477682.dkr.ecr.ca-central-1.amazonaws.com/queue-app:latest && (sudo docker stop queue-app && sudo docker rm queue-app || true) && sudo docker run -d --name queue-app -p 80:5001 750267477682.dkr.ecr.ca-central-1.amazonaws.com/queue-app:latest"
