@@ -56,8 +56,8 @@ jobs:
           
           # Update the description of the new rules
           echo 'Updating the description of the new rules to GitHub Action...'
-          aws ec2 update-security-group-rule-descriptions-ingress --group-id "$SECURITY_GROUP_ID" --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 22, "ToPort": 22, "IpRanges": [{"CidrIp": "'"$GITHUB_RUNNER_IP"'/32", "Description": "GitHub Action"}], "SecurityGroupRuleIds": ["'"$SGR_ID_22"'"]}]'
-          aws ec2 update-security-group-rule-descriptions-ingress --group-id "$SECURITY_GROUP_ID" --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 80, "ToPort": 80, "IpRanges": [{"CidrIp": "'"$GITHUB_RUNNER_IP"'/32", "Description": "GitHub Action"}], "SecurityGroupRuleIds": ["'"$SGR_ID_80"'"]}]'
+          aws ec2 set-security-group-rule-descriptions --security-group-rule-ids "$SGR_ID_22" --description "GitHub Action"
+          aws ec2 set-security-group-rule-descriptions --security-group-rule-ids "$SGR_ID_80" --description "GitHub Action"
           
           echo "Waiting 2 minutes for the security group changes to take effect"
           sleep 120
