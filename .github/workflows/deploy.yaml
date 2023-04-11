@@ -39,10 +39,10 @@ jobs:
 
           # Add new inbound rules without description
           echo 'Adding new inbound rules...'
-          ADD_RULES_RESULT=$(aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 22 --cidr "$GITHUB_RUNNER_IP/32" 2>&1)
+          ADD_RULES_RESULT=$(aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 22 --cidr "$GITHUB_RUNNER_IP/32" 2>&1 || true)
           echo "Error message (if any): $ADD_RULES_RESULT"
-
-          ADD_RULES_RESULT=$(aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 80 --cidr "$GITHUB_RUNNER_IP/32" 2>&1)
+          
+          ADD_RULES_RESULT=$(aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 80 --cidr "$GITHUB_RUNNER_IP/32" 2>&1 || true)
           echo "Error message (if any): $ADD_RULES_RESULT"
 
           # Update the description of the new rules
