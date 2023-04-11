@@ -56,7 +56,7 @@ jobs:
             echo 'Updating the description of the new rules to GitHub Action...'
             NEW_RULES_QUERY="SecurityGroups[].IpPermissions[] | [?(FromPort==\`22\` && ToPort==\`22\` && IpRanges[0].CidrIp==\`$GITHUB_RUNNER_IP/32\`) || (FromPort==\`80\` && ToPort==\`80\` && IpRanges[0].CidrIp==\`$GITHUB_RUNNER_IP/32\`)]"
             NEW_RULES=$(aws ec2 describe-security-groups --group-id "$SECURITY_GROUP_ID" --query "$NEW_RULES_QUERY" --output json)
-            aws ec2 update-security-group-rule-descriptions-ingress --group-id "$SECURITY_GROUP_ID" --ip-permissions "$NEW_RULES" --cli-input-json '{"IpPermissions":[{"FromPort":22,"ToPort":22,"IpProtocol":"tcp","IpRanges":[{"CidrIp":"'"$GITHUB_RUNNER_IP"'/32","Description":"GitHub Action"}]},{"FromPort":80,"ToPort":80,"IpProtocol":"tcp","IpRanges":[{"CidrIp":"'"$GITHUB_RUNNER_IP"'/32","Description":"GitHub Action"}]}]}'
+            aws ec2 update-security-group-rule-descriptions-ingress --group-id "$SECURITY_GROUP_ID" --ip-permissions "$NEW_RULES" --cli-input-json "{\"IpPermissions\":[{\"FromPort\":22,\"ToPort\":22,\"IpProtocol\":\"tcp\",\"IpRanges\":[{\"CidrIp\":\"$GITHUB_RUNNER_IP/32\",\"Description\":\"GitHub Action\"}]},{\"FromPort\":80,\"ToPort\":80,\"IpProtocol\":\"tcp\",\"IpRanges\":[{\"CidrIp\":\"$GITHUB_RUNNER_IP/32\",\"Description\":\"GitHub Action\"}]}]}"
           else
             echo "Could not add new rules due to reaching the maximum number of rules per security group."
           fi
