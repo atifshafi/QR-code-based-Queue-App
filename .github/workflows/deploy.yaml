@@ -49,8 +49,20 @@ jobs:
 
           # Add new inbound rules without description
           echo 'Adding new inbound rules...'
-          aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 22 --cidr "$GITHUB_RUNNER_IP/32" --description "GitHub Action"
-          aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 80 --cidr "$GITHUB_RUNNER_IP/32" --description "GitHub Action"
+          ADD_RULES_RESULT_22=$(aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 22 --cidr "$GITHUB_RUNNER_IP/32" --output json)
+          ADD_RULES_RESULT_80=$(aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 80 --cidr "$GITHUB_RUNNER_IP/32" --output json)
+          
+          # Extract IpPermissions
+          IP_PERMISSIONS_22=$(echo "$ADD_RULES_RESULT_22" | jq -c '.SecurityGroupRules[0] | {IpProtocol, FromPort, ToPort, IpRanges: [.CidrIpv4]}' | sed 's/CidrIpv4/Cidr/g')
+          IP_PERMISSIONS_80=$(echo "$ADD_RULES_RESULT_80" | jq -c '.SecurityGroupRules[0] | {IpProtocol, FromPort, ToPort, IpRanges: [.CidrIpv4]}' | sed 's/CidrIpv4/Cidr/g')
+          
+          echo "Waiting for 20 seconds before updating the description..."
+          sleep 20
+          
+          # Update the description of the new rules
+          echo "Updating the description of the new rules to GitHub Action..."
+          aws ec2 update-security-group-rule-descriptions-ingress --group-id "$SECURITY_GROUP_ID" --ip-permissions "$IP_PERMISSIONS_22" --rule-descriptions "GitHub Action"
+          aws ec2 update-security-group-rule-descriptions-ingress --group-id "$SECURITY_GROUP_ID" --ip-permissions "$IP_PERMISSIONS_80" --rule-descriptions "GitHub Action"
           
           echo "Waiting 2 minutes for the security group changes to take effect"
           sleep 120
