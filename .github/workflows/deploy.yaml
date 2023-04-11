@@ -59,6 +59,9 @@ jobs:
           SGR_ID_22=$(echo "$ADD_RULES_RESULT_22" | jq -r '.SecurityGroupRules[0].SecurityGroupRuleId')
           SGR_ID_80=$(echo "$ADD_RULES_RESULT_80" | jq -r '.SecurityGroupRules[0].SecurityGroupRuleId')
           
+          echo "Waiting for 20 seconds before updating the description..."
+          sleep 20
+          
           # Update the description of the new rules
           echo "Updating the description of the new rules to GitHub Action..."
           aws ec2 update-security-group-rule-descriptions-ingress --group-id "$SECURITY_GROUP_ID" --ip-permissions '[{"IpProtocol": "tcp", "FromPort": 22, "ToPort": 22, "IpRanges": [{"CidrIp": "13.88.61.185/32", "Description": "GitHub Action"}]}]'
