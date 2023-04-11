@@ -60,7 +60,7 @@ jobs:
           REMOTE_DOCKER_HOST=$USER@$(aws ec2 describe-instances --instance-ids $INSTANCE_ID --query 'Reservations[].Instances[].PublicDnsName' --output text)
 
           # Create a tarball of the necessary files
-          tar czvf deployment.tar.gz --exclude='*.tar.gz' --exclude='*.pem' *
+          tar czf deployment.tar.gz --exclude='*.tar.gz' --exclude='*.pem' *
 
           # Transfer the tarball instead of all files individually
           scp -i $PRIVATE_KEY_FILE -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null deployment.tar.gz $REMOTE_DOCKER_HOST:/tmp
