@@ -51,7 +51,7 @@ jobs:
           
           # Update the description of the new rules
           echo 'Updating the description of the new rules to GitHub Action...'
-          NEW_RULES=$(aws ec2 describe-security-groups --group-id "$SECURITY_GROUP_ID" --query 'SecurityGroups[].IpPermissions[] | [?((FromPort==22 and ToPort==22) and IpRanges[0].CidrIp==`$GITHUB_RUNNER_IP/32`) or ((FromPort==80 and ToPort==80) and IpRanges[0].CidrIp==`$GITHUB_RUNNER_IP/32`)]' --output json)
+          NEW_RULES=$(aws ec2 describe-security-groups --group-id "$SECURITY_GROUP_ID" --query "SecurityGroups[].IpPermissions[] | [?((FromPort==22 and ToPort==22) and IpRanges[0].CidrIp=='$GITHUB_RUNNER_IP/32') or ((FromPort==80 and ToPort==80) and IpRanges[0].CidrIp=='$GITHUB_RUNNER_IP/32')]" --output json)
           aws ec2 update-security-group-rule-descriptions-ingress --group-id "$SECURITY_GROUP_ID" --ip-permissions "$NEW_RULES" --cli-input-json '{"IpPermissions":[{"FromPort":22,"ToPort":22,"IpProtocol":"tcp","IpRanges":[{"CidrIp":"'"$GITHUB_RUNNER_IP"'/32","Description":"GitHub Action"}]},{"FromPort":80,"ToPort":80,"IpProtocol":"tcp","IpRanges":[{"CidrIp":"'"$GITHUB_RUNNER_IP"'/32","Description":"GitHub Action"}]}]}'
           
           echo "Waiting 2 minutes for the security group changes to take effect"
