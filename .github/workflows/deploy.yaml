@@ -42,6 +42,11 @@ jobs:
           echo 'Waiting for 10 seconds...'
           sleep 10
           
+          REMAINING_RULES=$(aws ec2 describe-security-groups --group-id "$SECURITY_GROUP_ID" --query "SecurityGroups[].IpPermissions[] | [?Description=='GitHub Action']" --output json)
+          if [ "$REMAINING_RULES" != "[]" ]; then
+            echo "Failed to remove existing rules with description GitHub Action."
+          fi
+
           # Add new inbound rules without description
           echo 'Adding new inbound rules...'
           ADD_RULES_RESULT_22=$(aws ec2 authorize-security-group-ingress --group-id "$SECURITY_GROUP_ID" --protocol tcp --port 22 --cidr "$GITHUB_RUNNER_IP/32" --output json)
