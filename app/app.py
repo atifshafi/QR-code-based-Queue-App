@@ -70,7 +70,10 @@ def validation():
     # Fix flash message
     # Verify if the phone number already exists in the database
     name = request.form['name']
-    phone_number = request.form['phone_number']
+    phone_area = request.form['phone_area']
+    phone_prefix = request.form['phone_prefix']
+    phone_line = request.form['phone_line']
+    phone_number = f"+1{phone_area}{phone_prefix}{phone_line}"
     customer = Customer.query.filter_by(phone=phone_number).first()
     # If phone number exists, redirect to the dashboard
     if customer is not None:
@@ -100,7 +103,7 @@ def validation():
             return redirect(url_for('welcome'))
         except Exception as e:
             # Handle the error (e.g., log the error or show an error message to the user)
-            return f"Error: SMS could not be sent. {e}"
+            return f"Error: SMS could not be sent. Please provide a valid phone number {e}"
 
 
 @app.route('/send_sms_to_customers', methods=['POST'])
@@ -168,9 +171,7 @@ def allowed_file(filename):
 
 @app.route('/upload_image', methods=['GET', 'POST'])
 def upload_image():
-    print('test')
     if request.method == 'POST':
-        print('test2')
         if 'image' not in request.files:
             flash('No image file found', 'danger')
             return redirect(request.url)
@@ -181,7 +182,6 @@ def upload_image():
             return redirect(request.url)
 
         if image_file and allowed_file(image_file.filename):
-            print('test3')
             image_title = request.form['title']
             image_mimetype = image_file.mimetype
 
@@ -255,12 +255,6 @@ def select_image():
 
     return jsonify(success=True)
 
-
-@app.route('/scan', methods=['GET', 'POST'])
-def scan():
-    return render_template('scan.html')
-
-
 @app.route('/get_queue')
 def get_queue():
     customers = Customer.query.all()
@@ -299,12 +293,6 @@ def join_queue():
     )
 
     return redirect(url_for('index'))
-
-
-@app.route('/image_selection', methods=['POST'])
-def image_selection():
-    # Implement the functionality to associate the selected image with the customer's details
-    pass
 
 
 @app.route('/notify_customer', methods=['POST'])
