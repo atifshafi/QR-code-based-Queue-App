@@ -18,8 +18,8 @@ twilio_phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI") # Only for local testing
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
@@ -153,6 +153,21 @@ def serve_image(image_id):
     return Response(image.data, content_type=image.mimetype)
 
 
+@app.route('/remove_image/<int:image_id>', methods=['POST'])
+@admin_required
+def remove_image(image_id):
+    print(image_id)
+    image_id = request.json['image_id']
+    image = Image.query.get(image_id)
+    if image:
+        db.session.delete(image)
+        db.session.commit()
+        flash('Image removed successfully', 'success')
+    else:
+        flash('Image not found', 'danger')
+    return redirect(url_for('welcome'))
+
+
 @app.route('/remove_customers', methods=['POST'])
 def remove_customers():
     customer_ids = request.form.getlist('customer_ids')
@@ -170,6 +185,7 @@ def allowed_file(filename):
 
 
 @app.route('/upload_image', methods=['GET', 'POST'])
+@admin_required
 def upload_image():
     if request.method == 'POST':
         if 'image' not in request.files:
@@ -211,6 +227,7 @@ def login():
             flash('Incorrect passcode! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
     return render_template('login.html')
+
 
 @app.route('/get_position')
 def get_position():
@@ -254,6 +271,7 @@ def select_image():
     db.session.commit()
 
     return jsonify(success=True)
+
 
 @app.route('/get_queue')
 def get_queue():
@@ -347,6 +365,7 @@ def send_message():
     flash('Message sent to the customer', 'success')
     return redirect(url_for('dashboard'))
 
+
 def create_database():
     try:
         connection = mysql.connector.connect(
@@ -357,7 +376,8 @@ def create_database():
 
         if connection.is_connected():
             cursor = connection.cursor()
-            cursor.execute("CREATE DATABASE IF NOT EXISTS `database-1` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+            cursor.execute(
+                "CREATE DATABASE IF NOT EXISTS `database-1` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
             connection.commit()
             print("Database created successfully")
 
@@ -370,6 +390,7 @@ def create_database():
             connection.close()
             print("MySQL connection is closed")
 
+
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
@@ -381,4 +402,3 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True, host='0.0.0.0', port=5001)
-

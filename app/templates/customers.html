@@ -231,8 +231,6 @@
 <!--</html>-->
 
 
-
-
 <!DOCTYPE html>
 <html lang='en'>
 
@@ -349,6 +347,30 @@
       .checkbox-container {
           padding: 10px 0;
       }
+
+      .button-row {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+      }
+
+      @media (min-width: 768px) {
+          .button-row {
+              flex-direction: row;
+          }
+      }
+
+      @media (max-width: 768px) {
+          .button-row {
+              text-align: left;
+          }
+      }
+
+      .spacing {
+          margin-top: 20px;
+      }
+
   </style>
 </head>
 <body>
@@ -413,15 +435,14 @@
             {% endfor %}
             </tbody>
           </table>
-
-          <button type='button' onclick='handleButtonClick("/remove_customers")'
-                  class='btn red waves-effect waves-light'
-                  id='removeSelectedCustomers'>Remove Selected
-          </button>
-          <button type='button' onclick='handleButtonClick("/send_sms_to_customers")'
-                  class='btn blue waves-effect waves-light'
-                  id='sendSMSToSelectedCustomers'>Send SMS to Selected
-          </button>
+          <div class='button-row spacing'>
+            <button type='button' onclick='handleButtonClick("/remove_customers")'
+                    class='btn red waves-effect waves-light' id='removeSelectedCustomers'>Remove Selected
+            </button>
+            <button type='button' onclick='handleButtonClick("/send_sms_to_customers")'
+                    class='btn blue waves-effect waves-light' id='sendSMSToSelectedCustomers'>Send SMS to Selected
+            </button>
+          </div>
         </form>
         <div class='background-image'></div>
       </div>
