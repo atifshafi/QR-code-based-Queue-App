@@ -444,37 +444,63 @@
   </footer>
   </div>
 </main>
-</body>
-<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js'></script>
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const swiper = new Swiper('.swiper-container', {
-      slidesPerView: 'auto', // Change this value to 'auto'
-      spaceBetween: 15,
+      slidesPerView: 'auto',
+      spaceBetween: 10,
       navigation: {
         nextEl: '.swiper-button-next',
         prevEl: '.swiper-button-prev'
       },
-      breakpoints: { // Add this breakpoints configuration
-        320: {
-          slidesPerView: 1
-        },
-        480: {
-          slidesPerView: 2
+      breakpoints: {
+        640: {
+          slidesPerView: 2,
+          spaceBetween: 20
         },
         768: {
-          slidesPerView: 3
+          slidesPerView: 3,
+          spaceBetween: 40
         },
         1024: {
-          slidesPerView: 4
-        },
-        1280: {
-          slidesPerView: 6
+          slidesPerView: 4,
+          spaceBetween: 50
         }
       }
     })
   })
 </script>
+</body>
+<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js'></script>
+<!--<script>-->
+<!--  document.addEventListener('DOMContentLoaded', function() {-->
+<!--    const swiper = new Swiper('.swiper-container', {-->
+<!--      slidesPerView: 'auto', // Change this value to 'auto'-->
+<!--      spaceBetween: 15,-->
+<!--      navigation: {-->
+<!--        nextEl: '.swiper-button-next',-->
+<!--        prevEl: '.swiper-button-prev'-->
+<!--      },-->
+<!--      breakpoints: { // Add this breakpoints configuration-->
+<!--        320: {-->
+<!--          slidesPerView: 1-->
+<!--        },-->
+<!--        480: {-->
+<!--          slidesPerView: 2-->
+<!--        },-->
+<!--        768: {-->
+<!--          slidesPerView: 3-->
+<!--        },-->
+<!--        1024: {-->
+<!--          slidesPerView: 4-->
+<!--        },-->
+<!--        1280: {-->
+<!--          slidesPerView: 6-->
+<!--        }-->
+<!--      }-->
+<!--    })-->
+<!--  })-->
+<!--</script>-->
 
 {% if session.admin_logged_in %}
 <script>
@@ -507,5 +533,4 @@
   }
 </script>
 {% endif %}
-
 </html>

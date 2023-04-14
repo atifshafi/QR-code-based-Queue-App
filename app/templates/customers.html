@@ -18,6 +18,28 @@
           color: #ffffff;
       }
 
+
+      .btn-custom {
+          background-color: #0091EA;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 12px 30px;
+          font-size: 16px;
+          min-width: 180px;
+          min-height: 50px;
+          border: none;
+          cursor: pointer;
+          text-decoration: none;
+          text-transform: uppercase;
+          transition: background-color 0.3s;
+      }
+
+      .btn-custom:hover {
+          background-color: #007AC1;
+      }
+
       .background-image {
           position: absolute;
           z-index: -1;
@@ -217,10 +239,11 @@
           </table>
           <div class='button-row spacing'>
             <button type='button' onclick='handleButtonClick("/remove_customers")'
-                    class='btn red waves-effect waves-light' id='removeSelectedCustomers'>Remove Selected
+                    class='btn-custom red waves-effect waves-light' id='removeSelectedCustomers'>Remove Selected
             </button>
             <button type='button' onclick='handleButtonClick("/send_sms_to_customers")'
-                    class='btn blue waves-effect waves-light' id='sendSMSToSelectedCustomers'>Send SMS to Selected
+                    class='btn-custom blue waves-effect waves-light' id='sendSMSToSelectedCustomers'>Send SMS to
+              Selected
             </button>
           </div>
         </form>
