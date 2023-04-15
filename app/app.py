@@ -106,8 +106,8 @@ def validation():
             return f"Error: SMS could not be sent. Please provide a valid phone number {e}"
 
 
-@app.route('/send_sms_to_customers', methods=['POST'])
-def send_sms_to_customers():
+@app.route('/send_sms_to_customers_invite', methods=['POST'])
+def send_sms_to_customers_invite():
     customer_ids = request.form.getlist('customer_ids')
     success_count = 0
     error_count = 0
@@ -118,7 +118,33 @@ def send_sms_to_customers():
             try:
                 client = Client(account_sid, auth_token)
                 message = client.messages.create(
-                    body="It's your turn! Please come to the desk :)",
+                    body="It's your turn, please come to the desk. Happy Mehndi! :)",
+                    from_=twilio_phone_number,
+                    to=customer.phone
+                )
+                success_count += 1
+            except Exception as e:
+                print(f"Error: SMS could not be sent to {customer.phone}. {e}")
+                error_count += 1
+
+    flash(f'Messages sent to {success_count} customers. {error_count} failed.',
+          'success' if success_count > 0 else 'danger')
+    return redirect(url_for('customers'))
+
+
+@app.route('/send_sms_to_customers_thankyou', methods=['POST'])
+def send_sms_to_customers_thankyou():
+    customer_ids = request.form.getlist('customer_ids')
+    success_count = 0
+    error_count = 0
+
+    for customer_id in customer_ids:
+        customer = Customer.query.get(customer_id)
+        if customer:
+            try:
+                client = Client(account_sid, auth_token)
+                message = client.messages.create(
+                    body="Thank you for visiting us! We hope you enjoyed your experience. Follow the artists on Instagram @henna_by_naba and @basus_mehndi_art. Hope to see you again soon!",
                     from_=twilio_phone_number,
                     to=customer.phone
                 )
@@ -214,18 +240,27 @@ def upload_image():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if 'admin_logged_in' in session:
+        flash('You are already logged in!', 'info')
+        return redirect(url_for('welcome'))
+
     if request.method == 'POST':
         passcode = request.form['passcode']
-        print(passcode)
         if passcode == 'mehndi123':
-            # Store the admin_logged_in flag in the session
             session['admin_logged_in'] = True
-            # Set the session as permanent
             session.permanent = True
-            return redirect(url_for('customers'))
+
+            last_visited_page = session.get('last_visited_page', url_for('customers'))
+            if last_visited_page.endswith(url_for('index')):
+                last_visited_page = url_for('welcome')
+            return redirect(last_visited_page)
         else:
             flash('Incorrect passcode! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
+
+    referrer = request.referrer
+    if referrer and referrer != request.url:
+        session['last_visited_page'] = referrer
     return render_template('login.html')
 
 
