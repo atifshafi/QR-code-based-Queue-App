@@ -80,7 +80,7 @@ jobs:
       - name: Install AWS CLI
         run: |
           sudo apt-get update
-          sudo apt-get install -y awscli
+          sudo apt-get install -y awscli --fix-missing
 
       - name: Deploy to EC2 instance
         env:
