@@ -78,7 +78,9 @@ jobs:
           tags: ${{ steps.login-ecr.outputs.registry }}/queue-app:latest
 
       - name: Install AWS CLI
-        run: sudo apt-get install -y awscli
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
 
       - name: Deploy to EC2 instance
         env:
