@@ -8,6 +8,8 @@ import os
 from dotenv import load_dotenv
 import mysql.connector
 from mysql.connector import Error
+from PIL import Image as PilImage
+import io
 
 # Load the environment variables from the .env file
 load_dotenv()
@@ -161,7 +163,6 @@ def send_sms_to_customers_thankyou():
 @app.route('/welcome')
 def welcome():
     images = Image.query.all()
-    print(images)
     return render_template('welcome.html', images=images)
 
 
@@ -210,6 +211,19 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def resize_image(image_data, max_size):
+    image = PilImage.open(io.BytesIO(image_data))
+    if image.size[0] * image.size[1] <= max_size:
+        return image_data
+
+    scale_factor = (max_size / (image.size[0] * image.size[1])) ** 0.5
+    new_size = (int(image.size[0] * scale_factor), int(image.size[1] * scale_factor))
+    resized_image = image.resize(new_size, PilImage.ANTIALIAS)
+    image_bytes = io.BytesIO()
+    resized_image.save(image_bytes, format=image.format)
+    return image_bytes.getvalue()
+
+
 @app.route('/upload_image', methods=['GET', 'POST'])
 @admin_required
 def upload_image():
@@ -225,9 +239,14 @@ def upload_image():
 
         if image_file and allowed_file(image_file.filename):
             image_title = request.form['title']
-            image_mimetype = image_file.mimetype
+            image_data = image_file.read()
+            max_size = 1024 * 1024  # 1MB
 
-            new_image = Image(title=image_title, data=image_file.read(), mimetype=image_mimetype)
+            if len(image_data) > max_size:
+                image_data = resize_image(image_data, max_size)
+
+            image_mimetype = image_file.mimetype
+            new_image = Image(title=image_title, data=image_data, mimetype=image_mimetype)
             db.session.add(new_image)
             db.session.commit()
             flash('Image uploaded successfully', 'success')
@@ -236,6 +255,34 @@ def upload_image():
             flash('Invalid file type', 'danger')
 
     return render_template('welcome.html')
+
+
+# @app.route('/upload_image', methods=['GET', 'POST'])
+# @admin_required
+# def upload_image():
+#     if request.method == 'POST':
+#         if 'image' not in request.files:
+#             flash('No image file found', 'danger')
+#             return redirect(request.url)
+#
+#         image_file = request.files['image']
+#         if image_file.filename == '':
+#             flash('No image file selected', 'danger')
+#             return redirect(request.url)
+#
+#         if image_file and allowed_file(image_file.filename):
+#             image_title = request.form['title']
+#             image_mimetype = image_file.mimetype
+#
+#             new_image = Image(title=image_title, data=image_file.read(), mimetype=image_mimetype)
+#             db.session.add(new_image)
+#             db.session.commit()
+#             flash('Image uploaded successfully', 'success')
+#             return redirect(url_for('welcome'))
+#         else:
+#             flash('Invalid file type', 'danger')
+#
+#     return render_template('welcome.html')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -428,8 +475,8 @@ def create_database():
 
 @app.route('/logout')
 def logout():
-    session.pop('user_id', None)
-    return redirect(url_for('index'))
+    session.pop('admin_logged_in', None)
+    return redirect(url_for('welcome'))
 
 
 if __name__ == '__main__':
