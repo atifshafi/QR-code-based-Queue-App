@@ -209,29 +209,24 @@ def remove_customers():
     return redirect(url_for('customers'))
 
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
 def resize_image(image_data, max_size, max_width=800, max_height=800):
     image = Image.open(io.BytesIO(image_data))
 
-    if len(image_data) <= (1024 * 1024):  # Check if the image is less than or equal to 1MB
+    if len(image_data) <= 1024 * 1024:  # 1MB
         return image_data
 
     aspect_ratio = float(image.size[0]) / float(image.size[1])
+    scale_factor = (max_size / (image.size[0] * image.size[1])) ** 0.5
+    new_width = int(image.size[0] * scale_factor)
+    new_height = int(image.size[1] * scale_factor)
 
-    if image.size[0] > max_width or image.size[1] > max_height:
-        if aspect_ratio > 1:  # Width is greater than height
-            new_width = max_width
-            new_height = int(new_width / aspect_ratio)
-        else:  # Height is greater than or equal to width
-            new_height = max_height
-            new_width = int(new_height * aspect_ratio)
-    else:
-        scale_factor = (max_size / (image.size[0] * image.size[1])) ** 0.5
-        new_width = int(image.size[0] * scale_factor)
-        new_height = int(image.size[1] * scale_factor)
+    if new_width > max_width:
+        new_width = max_width
+        new_height = int(new_width / aspect_ratio)
+
+    if new_height > max_height:
+        new_height = max_height
+        new_width = int(new_height * aspect_ratio)
 
     resized_image = image.resize((new_width, new_height), Image.ANTIALIAS)
 
