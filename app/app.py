@@ -258,10 +258,14 @@ def resize_image(image_data, max_size, max_width=800, max_height=800, target_asp
 
     resized_image = image.resize((new_width, new_height), Image.ANTIALIAS)
 
-    # Add black bars if aspect ratio is not 4/5
-    if aspect_ratio != target_aspect_ratio:
-        padded_image = ImageOps.pad(resized_image, (max_width, max_height), color="black", centering=(0.5, 0.5))
-        resized_image = padded_image
+    # Add black bars to maintain the target aspect ratio
+    if aspect_ratio < target_aspect_ratio:
+        new_width = int(new_height * target_aspect_ratio)
+    else:
+        new_height = int(new_width / target_aspect_ratio)
+
+    padded_image = ImageOps.pad(resized_image, (new_width, new_height), color="black", centering=(0.5, 0.5))
+    resized_image = padded_image
 
     image_bytes = io.BytesIO()
     resized_image.save(image_bytes, format=image.format)
