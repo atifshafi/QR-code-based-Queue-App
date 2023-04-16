@@ -235,6 +235,10 @@ def resize_image(image_data, max_size, max_width=800, max_height=800):
     return image_bytes.getvalue()
 
 
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
 @app.route('/upload_image', methods=['GET', 'POST'])
 @admin_required
 def upload_image():
