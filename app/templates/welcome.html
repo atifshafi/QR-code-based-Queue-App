@@ -181,10 +181,17 @@
       }
 
       .fixed-size {
-          width: 600px; /* Increase the image width */
-          height: 350px; /* Increase the image height */
+          width: 100%;
+          height: auto;
           object-fit: cover;
           object-position: center;
+      }
+
+      @media screen and (min-width: 768px) {
+          .fixed-size {
+              width: 600px;
+              height: 350px;
+          }
       }
 
       .card-img-container {
