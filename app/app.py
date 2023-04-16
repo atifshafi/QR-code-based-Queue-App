@@ -214,15 +214,25 @@ def allowed_file(filename):
 
 
 def resize_image(image_data, max_size, max_width=800, max_height=800):
-    image = PilImage.open(io.BytesIO(image_data))
+    image = Image.open(io.BytesIO(image_data))
 
     if image.size[0] * image.size[1] <= max_size and max(image.size) <= max(max_width, max_height):
         return image_data
 
+    aspect_ratio = float(image.size[0]) / float(image.size[1])
     scale_factor = (max_size / (image.size[0] * image.size[1])) ** 0.5
-    new_size = (int(image.size[0] * scale_factor), int(image.size[1] * scale_factor))
-    new_size = tuple(min(dim, max_dim) for dim, max_dim in zip(new_size, (max_width, max_height)))
-    resized_image = ImageOps.fit(image, new_size, PilImage.ANTIALIAS)
+    new_width = int(image.size[0] * scale_factor)
+    new_height = int(image.size[1] * scale_factor)
+
+    if new_width > max_width:
+        new_width = max_width
+        new_height = int(new_width / aspect_ratio)
+
+    if new_height > max_height:
+        new_height = max_height
+        new_width = int(new_height * aspect_ratio)
+
+    resized_image = image.resize((new_width, new_height), Image.ANTIALIAS)
 
     image_bytes = io.BytesIO()
     resized_image.save(image_bytes, format=image.format)
