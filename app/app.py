@@ -165,7 +165,7 @@ def send_sms_to_customers_thankyou():
 @app.route('/welcome')
 def welcome():
     # images = Image.query.all()
-    images = Image_DB.query.order_by(Image._id.desc()).all()
+    images = Image_DB.query.order_by(Image_DB._id.desc()).all()
     return render_template('welcome.html', images=images)
 
 
