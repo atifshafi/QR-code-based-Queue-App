@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import mysql.connector
 from mysql.connector import Error
 from PIL import Image as PilImage
+from PIL import ImageOps
 import io
 
 # Load the environment variables from the .env file
@@ -212,14 +213,17 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def resize_image(image_data, max_size):
+def resize_image(image_data, max_size, max_width=800, max_height=800):
     image = PilImage.open(io.BytesIO(image_data))
-    if image.size[0] * image.size[1] <= max_size:
+
+    if image.size[0] * image.size[1] <= max_size and max(image.size) <= max(max_width, max_height):
         return image_data
 
     scale_factor = (max_size / (image.size[0] * image.size[1])) ** 0.5
     new_size = (int(image.size[0] * scale_factor), int(image.size[1] * scale_factor))
-    resized_image = image.resize(new_size, PilImage.ANTIALIAS)
+    new_size = tuple(min(dim, max_dim) for dim, max_dim in zip(new_size, (max_width, max_height)))
+    resized_image = ImageOps.fit(image, new_size, PilImage.ANTIALIAS)
+
     image_bytes = io.BytesIO()
     resized_image.save(image_bytes, format=image.format)
     return image_bytes.getvalue()
