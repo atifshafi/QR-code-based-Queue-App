@@ -31,7 +31,7 @@ db = SQLAlchemy(app)
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
-class Image(db.Model):
+class Image_DB(db.Model):
     _id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
@@ -165,7 +165,7 @@ def send_sms_to_customers_thankyou():
 @app.route('/welcome')
 def welcome():
     # images = Image.query.all()
-    images = Image.query.order_by(Image._id.desc()).all()
+    images = Image_DB.query.order_by(Image._id.desc()).all()
     return render_template('welcome.html', images=images)
 
 
@@ -179,7 +179,7 @@ def customers():
 
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
-    image = Image.query.get_or_404(image_id)
+    image = Image_DB.query.get_or_404(image_id)
     return Response(image.data, content_type=image.mimetype)
 
 
@@ -188,7 +188,7 @@ def serve_image(image_id):
 def remove_image(image_id):
     print(image_id)
     image_id = request.json['image_id']
-    image = Image.query.get(image_id)
+    image = Image_DB.query.get(image_id)
     if image:
         db.session.delete(image)
         db.session.commit()
@@ -262,7 +262,7 @@ def upload_image():
                 image_data = resize_image(image_data, max_size)
 
             image_mimetype = image_file.mimetype
-            new_image = Image(title=image_title, data=image_data, mimetype=image_mimetype)
+            new_image = Image_DB(title=image_title, data=image_data, mimetype=image_mimetype)
             db.session.add(new_image)
             db.session.commit()
             flash('Image uploaded successfully', 'success')
