@@ -8,9 +8,10 @@ import os
 from dotenv import load_dotenv
 import mysql.connector
 from mysql.connector import Error
-from PIL import Image as PilImage
+from PIL import Image
 from PIL import ImageOps
 import io
+from werkzeug.utils import secure_filename
 
 # Load the environment variables from the .env file
 load_dotenv()
