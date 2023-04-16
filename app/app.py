@@ -240,7 +240,7 @@ def upload_image():
         if image_file and allowed_file(image_file.filename):
             image_title = request.form['title']
             image_data = image_file.read()
-            max_size = 1024 * 1024  # 1MB
+            max_size = 512 * 1024  # 1MB
 
             if len(image_data) > max_size:
                 image_data = resize_image(image_data, max_size)
