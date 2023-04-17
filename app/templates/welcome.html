@@ -44,11 +44,44 @@
           align-items: center;
           position: relative;
           z-index: 1;
-          width: 100%; /* Change the width to 100% */
-          height: 85%; /* Adjust the height value as needed */
+          width: 100%;
+          height: 100%;
           margin: 0 auto;
           max-width: 100%;
       }
+
+      .overlay-container .overlay-image {
+          position: absolute;
+          top: 0;
+          left: 50%;
+          transform: translateX(-50%);
+          bottom: 0;
+          width: 50%;
+          height: 100%;
+          background-image: url('static/image/overlay-image.png');
+          background-position: center;
+          background-repeat: no-repeat;
+          background-size: cover;
+      }
+
+      .overlay-container .overlay-text {
+          position: relative;
+          z-index: 2;
+      }
+
+
+      /*.overlay-container {*/
+      /*    display: flex;*/
+      /*    justify-content: center;*/
+      /*    align-items: center;*/
+      /*    position: relative;*/
+      /*    z-index: 1;*/
+      /*    width: 100%;*/
+      /*    height: 100%;*/
+      /*    margin: 0 auto;*/
+      /*    max-width: 100%;*/
+      /*}*/
+
 
       /*.overlay-image {*/
       /*    position: absolute;*/
@@ -82,12 +115,6 @@
           .overlay-image {
               width: 50%;
           }
-      }
-
-
-      .overlay-text {
-          position: relative;
-          z-index: 2;
       }
 
       img.welcome-image {
