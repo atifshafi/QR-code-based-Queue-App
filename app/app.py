@@ -282,34 +282,6 @@ def upload_image():
     return render_template('welcome.html')
 
 
-# @app.route('/upload_image', methods=['GET', 'POST'])
-# @admin_required
-# def upload_image():
-#     if request.method == 'POST':
-#         if 'image' not in request.files:
-#             flash('No image file found', 'danger')
-#             return redirect(request.url)
-#
-#         image_file = request.files['image']
-#         if image_file.filename == '':
-#             flash('No image file selected', 'danger')
-#             return redirect(request.url)
-#
-#         if image_file and allowed_file(image_file.filename):
-#             image_title = request.form['title']
-#             image_mimetype = image_file.mimetype
-#
-#             new_image = Image(title=image_title, data=image_file.read(), mimetype=image_mimetype)
-#             db.session.add(new_image)
-#             db.session.commit()
-#             flash('Image uploaded successfully', 'success')
-#             return redirect(url_for('welcome'))
-#         else:
-#             flash('Invalid file type', 'danger')
-#
-#     return render_template('welcome.html')
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if 'admin_logged_in' in session:
@@ -506,6 +478,9 @@ def logout():
 
 if __name__ == '__main__':
     create_database()
+    # with app.app_context():
+    #     db.create_all()
+    # app.run(debug=True, host='0.0.0.0', port=5001)
     with app.app_context():
         db.create_all()
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    app.run(debug=True)

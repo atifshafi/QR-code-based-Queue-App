@@ -5,3 +5,4 @@ mysqlclient
 mysql-connector-python
 python-dotenv
 Pillow
+gunicorn
