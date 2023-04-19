@@ -122,23 +122,12 @@
       {% endif %}
       {% endwith %}
       <form id='customer-form' action='/validation' method='post' novalidate>
-        <!--        <div class='form-group'>-->
-        <!--          <label for='name'>Name:</label>-->
-        <!--          <input type='text' class='form-control' id='name' name='name' required>-->
-
-
-        <!--          <select class='form-select' id='admin' name='admin' required>-->
-        <!--            <option selected disabled value=''>Select Admin</option>-->
-        <!--            &lt;!&ndash; JavaScript will populate the list of admins here &ndash;&gt;-->
-        <!--          </select>-->
-        <!--        </div>-->
-
         <div class='form-group d-flex gap-3'>
           <label for='name'>Name:</label>
           <input type='text' class='form-control' id='name' name='name' required>
           <label for='admin'>Henna Artist:</label>
           <select class='form-select' id='admin' name='admin' required>
-            <option selected disabled value=''>Select Henna Artist</option>
+            <option selected disabled value=''>Select</option>
             <option value='any'>Any (quickest)</option>
             <!-- JavaScript will populate the list of admins here -->
           </select>

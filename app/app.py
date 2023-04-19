@@ -13,6 +13,7 @@ from PIL import ImageOps
 import io
 from werkzeug.utils import secure_filename
 from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.exc import SQLAlchemyError
 
 # Load the environment variables from the .env file
 load_dotenv()
@@ -39,20 +40,37 @@ class Image_DB(db.Model):
     mimetype = db.Column(db.String(100), nullable=False)
 
 
+# class Customer(db.Model):
+#     _id = db.Column(db.Integer, primary_key=True)
+#     name = db.Column(db.String(100), nullable=False)
+#     phone = db.Column(db.String(20), nullable=False)
+#     admin = db.Column(db.String(100), nullable=False)
+#     image_id = db.Column(db.Integer, nullable=True)
+#
+#     def __init__(self, name, phone, admin):
+#         self.name = name
+#         self.phone = phone
+#         self.admin = admin
+#
+#     def __repr__(self):
+#         return '<Customer %r>' % self.name
+
 class Customer(db.Model):
     _id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
-    admin = db.Column(db.String(100), nullable=False)
+    admin_id = db.Column(db.Integer, db.ForeignKey('admin.id'), nullable=False)
+    admin = db.relationship('Admin', backref=db.backref('customers', lazy=True))
     image_id = db.Column(db.Integer, nullable=True)
 
-    def __init__(self, name, phone, admin):
+    def __init__(self, name, phone, admin_id):
         self.name = name
         self.phone = phone
-        self.admin = admin
+        self.admin_id = admin_id
 
     def __repr__(self):
         return '<Customer %r>' % self.name
+
 
 
 class Admin(db.Model):
@@ -95,13 +113,15 @@ def validation():
         return redirect(url_for('welcome'))
     else:
         if admin == 'any':
-            admin = find_least_busy_admin()
+            admin_id = find_least_busy_admin()
+        else:
+            admin_id = admin
 
-        new_customer = Customer(name=name, phone=phone_number, admin=admin)
+        new_customer = Customer(name=name, phone=phone_number, admin_id=admin_id)
         db.session.add(new_customer)
         db.session.commit()
 
-        wait_time = 15 * (Customer.query.filter_by(admin=admin).count() - 1)
+        wait_time = 15 * (Customer.query.filter_by(admin_id=admin).count() - 1)
         message_body = f"Eid Mubarak! Thank you {name} for joining the queue. Your estimated wait time is {wait_time} minutes."
         client = Client(account_sid, auth_token)
         try:
@@ -142,19 +162,22 @@ def find_least_busy_admin():
 def add_predefined_admins():
     admins = [
         {"username": "Naba", "password": "mehndi123"},
-        {"username": "Basma", "password": "mehndi456"}
+        {"username": "Basma", "password": "mehndi123"}
     ]
 
     for admin in admins:
-        existing_admin = Admin.query.filter_by(username=admin["username"]).first()
-        if not existing_admin:
-            hashed_password = generate_password_hash(admin["password"])
-            new_admin = Admin(username=admin["username"], password=hashed_password)
-            db.session.add(new_admin)
-            db.session.commit()
-            print(f"Admin {admin['username']} added successfully.")
-        else:
-            print(f"Admin {admin['username']} already exists.")
+        try:
+            existing_admin = Admin.query.filter_by(username=admin["username"]).first()
+            if not existing_admin:
+                hashed_password = generate_password_hash(admin["password"])
+                new_admin = Admin(username=admin["username"], password=hashed_password)
+                db.session.add(new_admin)
+                db.session.commit()
+                print(f"Admin {admin['username']} added successfully.")
+            else:
+                print(f"Admin {admin['username']} already exists.")
+        except SQLAlchemyError as e:
+            print(f"Error while adding admin {admin['username']}: {e}")
 
 
 @app.route('/send_sms_to_customers_invite', methods=['POST'])
@@ -217,6 +240,21 @@ def welcome():
 
 
 # Add the @admin_required decorator to restrict access to the customers page when not logged in as an admin
+# @app.route('/customers', methods=['GET', 'POST'])
+# @admin_required
+# def customers():
+#     admin_username = session.get('admin_username')
+#     if admin_username:
+#         admin = Admin.query.filter_by(username=admin_username).first()
+#         if admin:
+#             admin_id = admin.id
+#             customers = Customer.query.filter_by(admin=admin_id).all()
+#         else:
+#             customers = []
+#     else:
+#         customers = []
+#     return render_template('customers.html', customers=customers)
+
 @app.route('/customers', methods=['GET', 'POST'])
 @admin_required
 def customers():
@@ -225,12 +263,13 @@ def customers():
         admin = Admin.query.filter_by(username=admin_username).first()
         if admin:
             admin_id = admin.id
-            customers = Customer.query.filter_by(admin=admin_id).all()
+            customers = Customer.query.filter_by(admin_id=admin_id).all()
         else:
             customers = []
     else:
         customers = []
     return render_template('customers.html', customers=customers)
+
 
 
 @app.route('/image/<int:image_id>')
