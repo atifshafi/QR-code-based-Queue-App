@@ -386,15 +386,20 @@ def login():
         flash('You are already logged in!', 'info')
         return redirect(url_for('welcome'))
 
+    print('test1')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+        print(password)
         user = Admin.query.filter_by(username=username).first()
+        print(user)
+        print(user.password)
 
         if user and check_password_hash(user.password, password):
             session['admin_logged_in'] = True
             session.permanent = True
             session['admin_username'] = user.username
+            print('test3')
 
             last_visited_page = session.get('last_visited_page', url_for('customers'))
             if last_visited_page.endswith(url_for('index')):
@@ -436,87 +441,87 @@ def dashboard():
     return render_template('dashboard.html', queue=queue_data)
 
 
-@app.route('/select_image', methods=['POST'])
-def select_image():
-    image_id = request.json['image_id']
-    customer_id = session.get('customer_id')
-
-    if not customer_id:
-        return jsonify(success=False)
-
-    customer = Customer.query.get(customer_id)
-    if not customer:
-        return jsonify(success=False)
-
-    customer.image_id = image_id
-    db.session.commit()
-
-    return jsonify(success=True)
-
-
-@app.route('/get_queue')
-def get_queue():
-    customers = Customer.query.all()
-    queue_data = [
-        {
-            'id': customer.id,
-            'name': customer.name,
-            'phone': customer.phone,
-            'image_id': customer.image_id,
-        }
-        for customer in customers
-    ]
-    return jsonify(queue_data)
+# @app.route('/select_image', methods=['POST'])
+# def select_image():
+#     image_id = request.json['image_id']
+#     customer_id = session.get('customer_id')
+#
+#     if not customer_id:
+#         return jsonify(success=False)
+#
+#     customer = Customer.query.get(customer_id)
+#     if not customer:
+#         return jsonify(success=False)
+#
+#     customer.image_id = image_id
+#     db.session.commit()
+#
+#     return jsonify(success=True)
 
 
-@app.route('/join_queue', methods=['POST'])
-def join_queue():
-    name = request.form['name']
-    phone = request.form['phone']
-
-    new_customer = Customer(name=name, phone=phone)
-    db.session.add(new_customer)
-    db.session.commit()
-
-    # Send SMS using Twilio
-    account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
-    auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
-    twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
-
-    client = Client(account_sid, auth_token)
-
-    message = client.messages.create(
-        body="Thank you for joining the queue. Your estimated wait time is X minutes.",
-        from_=twilio_phone_number,
-        to=phone
-    )
-
-    return redirect(url_for('index'))
+# @app.route('/get_queue')
+# def get_queue():
+#     customers = Customer.query.all()
+#     queue_data = [
+#         {
+#             'id': customer.id,
+#             'name': customer.name,
+#             'phone': customer.phone,
+#             'image_id': customer.image_id,
+#         }
+#         for customer in customers
+#     ]
+#     return jsonify(queue_data)
 
 
-@app.route('/notify_customer', methods=['POST'])
-def notify_customer():
-    customer_id = request.form['customer_id']
-    customer = Customer.query.get(customer_id)
-    if not customer:
-        flash('Customer not found', 'danger')
-        return redirect(url_for('dashboard'))
+# @app.route('/join_queue', methods=['POST'])
+# def join_queue():
+#     name = request.form['name']
+#     phone = request.form['phone']
+#
+#     new_customer = Customer(name=name, phone=phone)
+#     db.session.add(new_customer)
+#     db.session.commit()
+#
+#     # Send SMS using Twilio
+#     account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+#     auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+#     twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
+#
+#     client = Client(account_sid, auth_token)
+#
+#     message = client.messages.create(
+#         body="Thank you for joining the queue. Your estimated wait time is X minutes.",
+#         from_=twilio_phone_number,
+#         to=phone
+#     )
+#
+#     return redirect(url_for('index'))
 
-    # Send SMS using Twilio
-    account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
-    auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
-    twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
 
-    client = Client(account_sid, auth_token)
-
-    message = client.messages.create(
-        body="It's your turn! Please proceed with the service or purchase.",
-        from_=twilio_phone_number,
-        to=customer.phone
-    )
-
-    flash('Notification sent to the customer', 'success')
-    return redirect(url_for('dashboard'))
+# @app.route('/notify_customer', methods=['POST'])
+# def notify_customer():
+#     customer_id = request.form['customer_id']
+#     customer = Customer.query.get(customer_id)
+#     if not customer:
+#         flash('Customer not found', 'danger')
+#         return redirect(url_for('dashboard'))
+#
+#     # Send SMS using Twilio
+#     account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
+#     auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
+#     twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
+#
+#     client = Client(account_sid, auth_token)
+#
+#     message = client.messages.create(
+#         body="It's your turn! Please proceed with the service or purchase.",
+#         from_=twilio_phone_number,
+#         to=customer.phone
+#     )
+#
+#     flash('Notification sent to the customer', 'success')
+#     return redirect(url_for('dashboard'))
 
 
 @app.route('/send_message', methods=['POST'])
