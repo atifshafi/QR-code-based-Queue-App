@@ -34,6 +34,7 @@ ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 
 class Image_DB(db.Model):
+    # __tablename__ = 'image'
     _id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     data = db.Column(db.LargeBinary, nullable=False)
@@ -56,6 +57,7 @@ class Image_DB(db.Model):
 #         return '<Customer %r>' % self.name
 
 class Customer(db.Model):
+    __tablename__ = 'customer'
     _id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
@@ -74,6 +76,7 @@ class Customer(db.Model):
 
 
 class Admin(db.Model):
+    __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(100), nullable=False)
