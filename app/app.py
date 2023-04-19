@@ -382,6 +382,7 @@ def upload_image():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    print('hi')
     if 'admin_logged_in' in session:
         flash('You are already logged in!', 'info')
         return redirect(url_for('welcome'))
@@ -408,6 +409,7 @@ def login():
         else:
             flash('Incorrect username or password! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
+    print('kiki')
 
     referrer = request.referrer
     if referrer and referrer != request.url:
