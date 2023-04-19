@@ -12,6 +12,7 @@ from PIL import Image
 from PIL import ImageOps
 import io
 from werkzeug.utils import secure_filename
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # Load the environment variables from the .env file
 load_dotenv()
@@ -42,20 +43,29 @@ class Customer(db.Model):
     _id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
+    admin = db.Column(db.String(100), nullable=False)
     image_id = db.Column(db.Integer, nullable=True)
 
-    def __init__(self, name, phone):
+    def __init__(self, name, phone, admin):
         self.name = name
         self.phone = phone
+        self.admin = admin
 
     def __repr__(self):
         return '<Customer %r>' % self.name
 
 
+class Admin(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(100), nullable=False, unique=True)
+    password = db.Column(db.String(100), nullable=False)
+
+
 @app.route('/')
 def index():
+    admins = Admin.query.all()
     # Add admin access to the welcome page by adding a link
-    return render_template('customer_form.html')
+    return render_template('customer_form.html', admins=admins)
 
 
 def admin_required(f):
@@ -71,26 +81,27 @@ def admin_required(f):
 
 @app.route('/validation', methods=['GET', 'POST'])
 def validation():
-    # Fix flash message
-    # Verify if the phone number already exists in the database
     name = request.form['name']
     phone_area = request.form['phone_area']
     phone_prefix = request.form['phone_prefix']
     phone_line = request.form['phone_line']
+    admin = request.form['admin']
+    admin_name = Admin.query.filter_by(id=admin).first().username
     phone_number = f"+1{phone_area}{phone_prefix}{phone_line}"
     customer = Customer.query.filter_by(phone=phone_number).first()
-    # If phone number exists, redirect to the dashboard
+
     if customer is not None:
         flash('You are already in the queue!', 'success')
         return redirect(url_for('welcome'))
-    # If not, Send message to the phone number using twillio and redirect to the welcome page
     else:
-        # Enter customer info to the db
-        new_customer = Customer(name=name, phone=phone_number)
+        if admin == 'any':
+            admin = find_least_busy_admin()
+
+        new_customer = Customer(name=name, phone=phone_number, admin=admin)
         db.session.add(new_customer)
         db.session.commit()
-        # Calculate the estimated wait time based on number of customers in the queue, assuming average wait time is 15 minutes
-        wait_time = 15 * Customer.query.count()
+
+        wait_time = 15 * (Customer.query.filter_by(admin=admin).count() - 1)
         message_body = f"Eid Mubarak! Thank you {name} for joining the queue. Your estimated wait time is {wait_time} minutes."
         client = Client(account_sid, auth_token)
         try:
@@ -100,14 +111,50 @@ def validation():
                 from_=twilio_phone_number,
                 to=phone_number
             )
-            # Calculate the estimated wait time based on number of customers in the queue, assuming average wait time is 15 minutes
-            wait_time = 15 * Customer.query.count()
-            flash(f'Thank you {name} for joining the queue. Your estimated wait time is {wait_time} minutes.',
-                  'success')
+            flash(
+                f'Thank you {name} for joining the queue. Hena artitst {admin_name} is thrilled that you could join us. Your estimated wait time is {wait_time} minutes.',
+                'success')
+
             return redirect(url_for('welcome'))
         except Exception as e:
-            # Handle the error (e.g., log the error or show an error message to the user)
-            return f"Error: SMS could not be sent. Please provide a valid phone number {e}"
+            db.session.rollback()  # Rollback any changes
+            db.session.query(Customer).filter(Customer.phone == phone_number).delete()  # Delete the customer
+            db.session.commit()  # Commit the delete operation
+
+            flash(f"Error: Please provide a valid phone number!", "error")
+            return redirect(url_for('index'))
+
+
+def find_least_busy_admin():
+    all_admins = Admin.query.all()
+    least_busy_admin = None
+    min_customers = float('inf')
+
+    for admin in all_admins:
+        customers_count = Customer.query.filter_by(admin=admin.id).count()
+        if customers_count < min_customers:
+            min_customers = customers_count
+            least_busy_admin = admin.id
+
+    return least_busy_admin
+
+
+def add_predefined_admins():
+    admins = [
+        {"username": "Naba", "password": "mehndi123"},
+        {"username": "Basma", "password": "mehndi456"}
+    ]
+
+    for admin in admins:
+        existing_admin = Admin.query.filter_by(username=admin["username"]).first()
+        if not existing_admin:
+            hashed_password = generate_password_hash(admin["password"])
+            new_admin = Admin(username=admin["username"], password=hashed_password)
+            db.session.add(new_admin)
+            db.session.commit()
+            print(f"Admin {admin['username']} added successfully.")
+        else:
+            print(f"Admin {admin['username']} already exists.")
 
 
 @app.route('/send_sms_to_customers_invite', methods=['POST'])
@@ -122,7 +169,7 @@ def send_sms_to_customers_invite():
             try:
                 client = Client(account_sid, auth_token)
                 message = client.messages.create(
-                    body="It's your turn, please come to the desk. Happy Mehndi! :)",
+                    body=f"It's your turn, please come to the desk. Happy Mehndi! :)",
                     from_=twilio_phone_number,
                     to=customer.phone
                 )
@@ -173,7 +220,16 @@ def welcome():
 @app.route('/customers', methods=['GET', 'POST'])
 @admin_required
 def customers():
-    customers = Customer.query.all()
+    admin_username = session.get('admin_username')
+    if admin_username:
+        admin = Admin.query.filter_by(username=admin_username).first()
+        if admin:
+            admin_id = admin.id
+            customers = Customer.query.filter_by(admin=admin_id).all()
+        else:
+            customers = []
+    else:
+        customers = []
     return render_template('customers.html', customers=customers)
 
 
@@ -289,17 +345,21 @@ def login():
         return redirect(url_for('welcome'))
 
     if request.method == 'POST':
-        passcode = request.form['passcode']
-        if passcode == 'mehndi123':
+        username = request.form['username']
+        password = request.form['password']
+        user = Admin.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
             session['admin_logged_in'] = True
             session.permanent = True
+            session['admin_username'] = user.username
 
             last_visited_page = session.get('last_visited_page', url_for('customers'))
             if last_visited_page.endswith(url_for('index')):
                 last_visited_page = url_for('welcome')
             return redirect(last_visited_page)
         else:
-            flash('Incorrect passcode! Hint: Ask Atif', 'danger')
+            flash('Incorrect username or password! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
 
     referrer = request.referrer
@@ -445,6 +505,13 @@ def send_message():
     return redirect(url_for('dashboard'))
 
 
+@app.route('/get_admins', methods=['GET'])
+def get_admins():
+    admins = Admin.query.all()
+    admin_list = [{"id": admin.id, "name": admin.username} for admin in admins]
+    return jsonify(admin_list)
+
+
 def create_database():
     try:
         connection = mysql.connector.connect(
@@ -480,4 +547,5 @@ if __name__ == '__main__':
     create_database()
     with app.app_context():
         db.create_all()
+        add_predefined_admins()
     app.run(debug=True, host="0.0.0.0", port=5001)

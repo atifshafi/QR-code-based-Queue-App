@@ -408,7 +408,7 @@
           </li>
           {% if 'admin_logged_in' in session %}
           <li class='nav-item'>
-            <a class='nav-link' href='/logout'>Logout</a>
+            <a class='nav-link' href='/logout'>Logout (Logged in as {{ session.admin_username }})</a>
           </li>
           {% else %}
           <li class='nav-item'>
@@ -420,7 +420,6 @@
     </div>
   </nav>
 </header>
-
 
 <main>
   <section class='container my-5'>
