@@ -86,7 +86,6 @@ def admin_required(f):
 
 @app.route('/validation', methods=['GET', 'POST'])
 def validation():
-    print('hi')
     name = request.form['name']
     phone_area = request.form['phone_area']
     phone_prefix = request.form['phone_prefix']
@@ -120,11 +119,11 @@ def validation():
         client = Client(account_sid, auth_token)
         try:
             print("Sending message...")
-            message = client.messages.create(
-                body=message_body,
-                from_=twilio_phone_number,
-                to=phone_number
-            )
+            # message = client.messages.create(
+            #     body=message_body,
+            #     from_=twilio_phone_number,
+            #     to=phone_number
+            # )
             flash(
                 f'Thank you {name} for joining the queue. Hena artitst {admin_name} is thrilled that you could join us. Your estimated wait time is {wait_time} minutes.',
                 'success')
@@ -355,6 +354,7 @@ def upload_image():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    print('test')
     if 'admin_logged_in' in session:
         flash('You are already logged in!', 'info')
         return redirect(url_for('welcome'))
