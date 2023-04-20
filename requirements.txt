@@ -1,8 +1,9 @@
 flask
 flask_sqlalchemy
+Flask
 twilio
 mysql.connector
 sqlalchemy
-dotenv
+python-dotenv
 werkzeug
 pillow

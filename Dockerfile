@@ -7,7 +7,7 @@ WORKDIR /app
 COPY requirements.txt ./
 
 # Install dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 # Copy the entire project directory (including app.py) to the working directory
 COPY . .
