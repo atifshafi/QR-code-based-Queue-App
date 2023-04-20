@@ -295,11 +295,11 @@ def remove_customers():
 def resize_image(image_data, max_size, max_width=800, max_height=800, target_aspect_ratio=4 / 5):
     image = Image.open(io.BytesIO(image_data))
 
-    if len(image_data) <= 1024 * 1024:  # 1MB
+    if len(image_data) <= 512 * 1024:  # 1MB or hal
         return image_data
 
     aspect_ratio = float(image.size[0]) / float(image.size[1])
-    scale_factor = (max_size / (image.size[0] * image.size[1])) ** 0.5
+    scale_factor = (max_size / (image.size[0] * image.size[1])) ** 0.7
     new_width = int(image.size[0] * scale_factor)
     new_height = int(image.size[1] * scale_factor)
 
@@ -347,7 +347,7 @@ def upload_image():
         if image_file and allowed_file(image_file.filename):
             image_title = request.form['title']
             image_data = image_file.read()
-            max_size = 512 * 1024  # 1MB
+            max_size = 512 * 1024  # 1MB or half
 
             if len(image_data) > max_size:
                 image_data = resize_image(image_data, max_size)
@@ -366,7 +366,6 @@ def upload_image():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    print('test')
     if 'admin_logged_in' in session:
         flash('You are already logged in!', 'info')
         return redirect(url_for('welcome'))
