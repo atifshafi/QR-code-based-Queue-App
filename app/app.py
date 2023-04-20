@@ -248,12 +248,6 @@ def customers():
     return render_template('customers.html', customers=customers)
 
 
-# @app.route('/image/<int:image_id>')
-# def serve_image(image_id):
-#     image = Image_DB.query.get_or_404(image_id)
-#     return Response(image.data, content_type=image.mimetype)
-
-
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
     image = Image_DB.query.get(image_id)
@@ -375,7 +369,7 @@ def login():
         password = request.form['password']
         user = Admin.query.filter_by(username=username).first()
 
-        if password == 'mehndi123':
+        if (username == 'Naba' or username == 'Basma') and password == 'mehndi123':
             session['admin_logged_in'] = True
             session.permanent = True
             session['admin_username'] = user.username
@@ -386,7 +380,7 @@ def login():
             return redirect(last_visited_page)
         else:
             print('error!')
-            flash('Incorrect username or password! Hint: Ask Atif', 'danger')
+            flash('Incorrect username and/or password! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
 
     # Fix this

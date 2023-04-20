@@ -121,6 +121,8 @@
       </div>
       {% endif %}
       {% endwith %}
+      <div id='error-message-container' class='alert alert-error' role='alert' style='display: none;'>
+      </div>
       <form id='customer-form' action='/validation' method='post' novalidate>
         <div class='form-group d-flex gap-3'>
           <label for='name'>Name:</label>
@@ -132,19 +134,22 @@
             <!-- JavaScript will populate the list of admins here -->
           </select>
         </div>
-        <div class='form-group'>
-          <div class='phone-number-fields'>
+
+        <div class='form-group d-flex align-items-center gap-2'>
+          <label class='flex-shrink-0'>Phone:</label>
+          <div class='phone-number-fields d-flex flex-grow-1'>
             <span class='plus-one'>+1</span>
-            <input type='tel' class='form-control' id='phone_area' name='phone_area' maxlength='3'
+            <input type='tel' class='form-control flex-grow-1' id='phone_area' name='phone_area' maxlength='3'
                    size='3' required>
             <span class='dash'>-</span>
-            <input type='tel' class='form-control' id='phone_prefix' name='phone_prefix' maxlength='3'
+            <input type='tel' class='form-control flex-grow-1' id='phone_prefix' name='phone_prefix' maxlength='3'
                    size='3' required>
             <span class='dash'>-</span>
-            <input type='tel' class='form-control' id='phone_line' name='phone_line' maxlength='4'
+            <input type='tel' class='form-control flex-grow-1' id='phone_line' name='phone_line' maxlength='4'
                    size='4' required>
           </div>
         </div>
+
     </div>
     <div class='form-group text-center'>
       <button type='submit' class='btn btn-primary' id='join-queue-button'>Join Queue</button>
@@ -156,50 +161,124 @@
 <script src='https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js'></script>
 <script src='https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js'></script>
 <script>
+  // document.getElementById('customer-form').addEventListener('submit', function(event) {
+  //   const name = document.getElementById('name')
+  //   const phoneArea = document.getElementById('phone_area')
+  //   const phonePrefix = document.getElementById('phone_prefix')
+  //   const phoneLine = document.getElementById('phone_line')
+  //   let isValid = true
+  //
+  //   // Validate name
+  //   if (name.value.trim() === '') {
+  //     name.setCustomValidity('Name is required')
+  //     isValid = false
+  //   } else {
+  //     name.setCustomValidity('')
+  //   }
+  //
+  //   // Validate phone number
+  //   const phoneNumberPattern = /^\d{3}$/
+  //   if (!phoneNumberPattern.test(phoneArea.value.trim())) {
+  //     phoneArea.setCustomValidity('Please enter a valid area code')
+  //     isValid = false
+  //   } else {
+  //     phoneArea.setCustomValidity('')
+  //   }
+  //
+  //   if (!phoneNumberPattern.test(phonePrefix.value.trim())) {
+  //     phonePrefix.setCustomValidity('Please enter a valid prefix')
+  //     isValid = false
+  //   } else {
+  //     phonePrefix.setCustomValidity('')
+  //   }
+  //
+  //   const phoneLinePattern = /^\d{4}$/
+  //   if (!phoneLinePattern.test(phoneLine.value.trim())) {
+  //     phoneLine.setCustomValidity('Please enter a valid phone line number')
+  //     isValid = false
+  //   } else {
+  //     phoneLine.setCustomValidity('')
+  //   }
+  //
+  //   if (!isValid) {
+  //     event.preventDefault()
+  //     event.stopPropagation()
+  //   }
+  // })
+
+
   document.getElementById('customer-form').addEventListener('submit', function(event) {
     const name = document.getElementById('name')
     const phoneArea = document.getElementById('phone_area')
     const phonePrefix = document.getElementById('phone_prefix')
     const phoneLine = document.getElementById('phone_line')
     let isValid = true
+    let errorMessage = ''
 
     // Validate name
     if (name.value.trim() === '') {
       name.setCustomValidity('Name is required')
+      name.classList.add('is-invalid') // Add 'is-invalid' class to show red border
       isValid = false
+      errorMessage = 'Name is required'
     } else {
       name.setCustomValidity('')
+      name.classList.remove('is-invalid') // Remove 'is-invalid' class
     }
 
     // Validate phone number
     const phoneNumberPattern = /^\d{3}$/
     if (!phoneNumberPattern.test(phoneArea.value.trim())) {
       phoneArea.setCustomValidity('Please enter a valid area code')
+      phoneArea.classList.add('is-invalid')
       isValid = false
+      errorMessage = 'Please enter a valid phone number'
     } else {
       phoneArea.setCustomValidity('')
+      phoneArea.classList.remove('is-invalid')
     }
 
     if (!phoneNumberPattern.test(phonePrefix.value.trim())) {
       phonePrefix.setCustomValidity('Please enter a valid prefix')
+      phonePrefix.classList.add('is-invalid')
       isValid = false
+      errorMessage = 'Please enter a valid phone number'
     } else {
       phonePrefix.setCustomValidity('')
+      phonePrefix.classList.remove('is-invalid')
     }
 
     const phoneLinePattern = /^\d{4}$/
     if (!phoneLinePattern.test(phoneLine.value.trim())) {
       phoneLine.setCustomValidity('Please enter a valid phone line number')
+      phoneLine.classList.add('is-invalid')
       isValid = false
+      errorMessage = 'Please enter a valid phone number'
     } else {
       phoneLine.setCustomValidity('')
+      phoneLine.classList.remove('is-invalid')
+    }
+
+    // Validate admin selection
+    const admin = document.getElementById('admin')
+    if (admin.value === '') {
+      admin.parentElement.classList.add('is-invalid')
+      isValid = false
+      errorMessage = 'Please select a Henna Artist'
+    } else {
+      admin.parentElement.classList.remove('is-invalid')
     }
 
     if (!isValid) {
       event.preventDefault()
       event.stopPropagation()
+      // Show the error message
+      const errorMessageContainer = document.getElementById('error-message-container')
+      errorMessageContainer.textContent = errorMessage
+      errorMessageContainer.style.display = 'block'
     }
   })
+
 
   function moveToNextInput(event, currentInput, nextInput) {
     if (currentInput.value.length >= currentInput.maxLength) {
