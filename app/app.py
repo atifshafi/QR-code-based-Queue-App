@@ -24,8 +24,8 @@ twilio_phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
@@ -40,21 +40,6 @@ class Image_DB(db.Model):
     data = db.Column(db.LargeBinary, nullable=False)
     mimetype = db.Column(db.String(100), nullable=False)
 
-
-# class Customer(db.Model):
-#     _id = db.Column(db.Integer, primary_key=True)
-#     name = db.Column(db.String(100), nullable=False)
-#     phone = db.Column(db.String(20), nullable=False)
-#     admin = db.Column(db.String(100), nullable=False)
-#     image_id = db.Column(db.Integer, nullable=True)
-#
-#     def __init__(self, name, phone, admin):
-#         self.name = name
-#         self.phone = phone
-#         self.admin = admin
-#
-#     def __repr__(self):
-#         return '<Customer %r>' % self.name
 
 class Customer(db.Model):
     __tablename__ = 'customer'
@@ -101,6 +86,7 @@ def admin_required(f):
 
 @app.route('/validation', methods=['GET', 'POST'])
 def validation():
+    print('hi')
     name = request.form['name']
     phone_area = request.form['phone_area']
     phone_prefix = request.form['phone_prefix']
@@ -120,7 +106,7 @@ def validation():
         flash('You are already in the queue!', 'success')
         return redirect(url_for('welcome'))
     else:
-        if admin == 'any':
+        if admin == '3':
             admin_id = find_least_busy_admin()["id"]
         else:
             admin_id = admin
@@ -246,22 +232,6 @@ def welcome():
     images = Image_DB.query.order_by(Image_DB._id.desc()).all()
     return render_template('welcome.html', images=images)
 
-
-# Add the @admin_required decorator to restrict access to the customers page when not logged in as an admin
-# @app.route('/customers', methods=['GET', 'POST'])
-# @admin_required
-# def customers():
-#     admin_username = session.get('admin_username')
-#     if admin_username:
-#         admin = Admin.query.filter_by(username=admin_username).first()
-#         if admin:
-#             admin_id = admin.id
-#             customers = Customer.query.filter_by(admin=admin_id).all()
-#         else:
-#             customers = []
-#     else:
-#         customers = []
-#     return render_template('customers.html', customers=customers)
 
 @app.route('/customers', methods=['GET', 'POST'])
 @admin_required
