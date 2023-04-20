@@ -114,7 +114,7 @@ def validation():
         db.session.add(new_customer)
         db.session.commit()
 
-        wait_time = 15 * (Customer.query.filter_by(admin_id=admin).count() - 1)
+        wait_time = 10 * (Customer.query.filter_by(admin_id=admin).count())
         message_body = f"Eid Mubarak! Thank you {name} for joining the queue. Your estimated wait time is {wait_time} minutes."
         client = Client(account_sid, auth_token)
         try:
