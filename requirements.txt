@@ -3,3 +3,6 @@ flask_sqlalchemy
 twilio
 mysql.connector
 sqlalchemy
+dotenv
+werkzeug
+pillow
