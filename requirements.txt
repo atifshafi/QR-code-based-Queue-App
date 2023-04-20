@@ -1,6 +1,5 @@
 flask
 flask_sqlalchemy
 twilio
-functools
 mysql.connector
 sqlalchemy
