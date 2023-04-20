@@ -24,8 +24,8 @@ twilio_phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
-# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
@@ -119,11 +119,11 @@ def validation():
         client = Client(account_sid, auth_token)
         try:
             print("Sending message...")
-            # message = client.messages.create(
-            #     body=message_body,
-            #     from_=twilio_phone_number,
-            #     to=phone_number
-            # )
+            message = client.messages.create(
+                body=message_body,
+                from_=twilio_phone_number,
+                to=phone_number
+            )
             flash(
                 f'Thank you {name} for joining the queue. Hena artitst {admin_name} is thrilled that you could join us. Your estimated wait time is {wait_time} minutes.',
                 'success')
@@ -513,7 +513,7 @@ def logout():
 
 
 if __name__ == '__main__':
-    # create_database()
+    create_database()
     with app.app_context():
         db.create_all()
         add_predefined_admins()
