@@ -1,4 +1,4 @@
-FROM python:3.9
+FROM python:3.9.7
 
 # Set the working directory
 WORKDIR /app
@@ -13,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run the applicationç
-CMD ["python", "app/app.py"]
+CMD ["python3.9", "app/app.py"]
