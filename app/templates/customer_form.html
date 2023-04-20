@@ -128,7 +128,7 @@
           <label for='admin'>Henna Artist:</label>
           <select class='form-select' id='admin' name='admin' required>
             <option selected disabled value=''>Select</option>
-            <option value='any'>Any (quickest)</option>
+            <option value='3'>Any (quickest)</option>
             <!-- JavaScript will populate the list of admins here -->
           </select>
         </div>
@@ -216,7 +216,6 @@
     moveToNextInput(event, this, document.getElementById('phone_line'))
   })
 
-  // Fetch the list of admins and populate the dropdown menu
   // Fetch the list of admins and populate the dropdown menu
   async function fetchAdmins() {
     try {

@@ -24,8 +24,8 @@ twilio_phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
@@ -74,7 +74,6 @@ class Customer(db.Model):
         return '<Customer %r>' % self.name
 
 
-
 class Admin(db.Model):
     __tablename__ = 'admin'
     id = db.Column(db.Integer, primary_key=True)
@@ -107,7 +106,13 @@ def validation():
     phone_prefix = request.form['phone_prefix']
     phone_line = request.form['phone_line']
     admin = request.form['admin']
-    admin_name = Admin.query.filter_by(id=admin).first().username
+    # Determine the admin name
+    if admin != '3':  # '3' is dedicated for 'Any'
+        admin_name = Admin.query.filter_by(id=admin).first().username
+    else:
+        # invoke function to find the least busy admin
+        admin_name = find_least_busy_admin()["username"]
+
     phone_number = f"+1{phone_area}{phone_prefix}{phone_line}"
     customer = Customer.query.filter_by(phone=phone_number).first()
 
@@ -116,7 +121,7 @@ def validation():
         return redirect(url_for('welcome'))
     else:
         if admin == 'any':
-            admin_id = find_least_busy_admin()
+            admin_id = find_least_busy_admin()["id"]
         else:
             admin_id = admin
 
@@ -150,14 +155,14 @@ def validation():
 
 def find_least_busy_admin():
     all_admins = Admin.query.all()
-    least_busy_admin = None
+    least_busy_admin = {}
     min_customers = float('inf')
 
     for admin in all_admins:
-        customers_count = Customer.query.filter_by(admin=admin.id).count()
+        customers_count = Customer.query.filter_by(admin_id=admin.id).count()
         if customers_count < min_customers:
             min_customers = customers_count
-            least_busy_admin = admin.id
+            least_busy_admin = {"id": admin.id, "username": admin.username}
 
     return least_busy_admin
 
@@ -274,7 +279,6 @@ def customers():
     return render_template('customers.html', customers=customers)
 
 
-
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
     image = Image_DB.query.get_or_404(image_id)
@@ -284,7 +288,6 @@ def serve_image(image_id):
 @app.route('/remove_image/<int:image_id>', methods=['POST'])
 @admin_required
 def remove_image(image_id):
-    print(image_id)
     image_id = request.json['image_id']
     image = Image_DB.query.get(image_id)
     if image:
@@ -382,25 +385,19 @@ def upload_image():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    print('hi')
     if 'admin_logged_in' in session:
         flash('You are already logged in!', 'info')
         return redirect(url_for('welcome'))
 
-    print('test1')
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        print(password)
         user = Admin.query.filter_by(username=username).first()
-        print(user)
-        print(user.password)
 
         if user and check_password_hash(user.password, password):
             session['admin_logged_in'] = True
             session.permanent = True
             session['admin_username'] = user.username
-            print('test3')
 
             last_visited_page = session.get('last_visited_page', url_for('customers'))
             if last_visited_page.endswith(url_for('index')):
@@ -409,7 +406,6 @@ def login():
         else:
             flash('Incorrect username or password! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
-    print('kiki')
 
     referrer = request.referrer
     if referrer and referrer != request.url:
@@ -441,89 +437,6 @@ def dashboard():
     # Fetch the queue data from the database and render the dashboard
     queue_data = db.session.query(Customer).all()
     return render_template('dashboard.html', queue=queue_data)
-
-
-# @app.route('/select_image', methods=['POST'])
-# def select_image():
-#     image_id = request.json['image_id']
-#     customer_id = session.get('customer_id')
-#
-#     if not customer_id:
-#         return jsonify(success=False)
-#
-#     customer = Customer.query.get(customer_id)
-#     if not customer:
-#         return jsonify(success=False)
-#
-#     customer.image_id = image_id
-#     db.session.commit()
-#
-#     return jsonify(success=True)
-
-
-# @app.route('/get_queue')
-# def get_queue():
-#     customers = Customer.query.all()
-#     queue_data = [
-#         {
-#             'id': customer.id,
-#             'name': customer.name,
-#             'phone': customer.phone,
-#             'image_id': customer.image_id,
-#         }
-#         for customer in customers
-#     ]
-#     return jsonify(queue_data)
-
-
-# @app.route('/join_queue', methods=['POST'])
-# def join_queue():
-#     name = request.form['name']
-#     phone = request.form['phone']
-#
-#     new_customer = Customer(name=name, phone=phone)
-#     db.session.add(new_customer)
-#     db.session.commit()
-#
-#     # Send SMS using Twilio
-#     account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
-#     auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
-#     twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
-#
-#     client = Client(account_sid, auth_token)
-#
-#     message = client.messages.create(
-#         body="Thank you for joining the queue. Your estimated wait time is X minutes.",
-#         from_=twilio_phone_number,
-#         to=phone
-#     )
-#
-#     return redirect(url_for('index'))
-
-
-# @app.route('/notify_customer', methods=['POST'])
-# def notify_customer():
-#     customer_id = request.form['customer_id']
-#     customer = Customer.query.get(customer_id)
-#     if not customer:
-#         flash('Customer not found', 'danger')
-#         return redirect(url_for('dashboard'))
-#
-#     # Send SMS using Twilio
-#     account_sid = os.environ.get('TWILIO_ACCOUNT_SID')
-#     auth_token = os.environ.get('TWILIO_AUTH_TOKEN')
-#     twilio_phone_number = os.environ.get('TWILIO_PHONE_NUMBER')
-#
-#     client = Client(account_sid, auth_token)
-#
-#     message = client.messages.create(
-#         body="It's your turn! Please proceed with the service or purchase.",
-#         from_=twilio_phone_number,
-#         to=customer.phone
-#     )
-#
-#     flash('Notification sent to the customer', 'success')
-#     return redirect(url_for('dashboard'))
 
 
 @app.route('/send_message', methods=['POST'])
