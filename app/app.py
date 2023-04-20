@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, get_flashed_messages, \
-    Response
+    Response, make_response, abort
 from flask_sqlalchemy import SQLAlchemy
 from twilio.rest import Client
 from datetime import timedelta
@@ -24,8 +24,8 @@ twilio_phone_number = os.environ.get("TWILIO_PHONE_NUMBER")
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///queue.sqlite3'  # For local testing
+# app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=60)
 
 db = SQLAlchemy(app)
@@ -248,10 +248,22 @@ def customers():
     return render_template('customers.html', customers=customers)
 
 
+# @app.route('/image/<int:image_id>')
+# def serve_image(image_id):
+#     image = Image_DB.query.get_or_404(image_id)
+#     return Response(image.data, content_type=image.mimetype)
+
+
 @app.route('/image/<int:image_id>')
 def serve_image(image_id):
-    image = Image_DB.query.get_or_404(image_id)
-    return Response(image.data, content_type=image.mimetype)
+    image = Image_DB.query.get(image_id)
+    if image:
+        response = make_response(image.data)
+        response.headers.set('Content-Type', image.mimetype)
+        response.headers.set('Content-Disposition', 'attachment', filename=image.title)
+        return response
+    else:
+        abort(404)
 
 
 @app.route('/remove_image/<int:image_id>', methods=['POST'])
@@ -359,20 +371,15 @@ def login():
         flash('You are already logged in!', 'info')
         return redirect(url_for('welcome'))
 
-
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
-        print(username, password)
         user = Admin.query.filter_by(username=username).first()
-        print(user)
 
         if password == 'mehndi123':
-            print('test1')
             session['admin_logged_in'] = True
             session.permanent = True
             session['admin_username'] = user.username
-            print(session['admin_username'])
 
             last_visited_page = session.get('last_visited_page', url_for('customers'))
             if last_visited_page.endswith(url_for('index')):
@@ -383,8 +390,7 @@ def login():
             flash('Incorrect username or password! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
 
-
-
+    # Fix this
     # if request.method == 'POST':
     #     username = request.form['username']
     #     password = request.form['password']
@@ -507,7 +513,7 @@ def logout():
 
 
 if __name__ == '__main__':
-    create_database()
+    # create_database()
     with app.app_context():
         db.create_all()
         add_predefined_admins()
