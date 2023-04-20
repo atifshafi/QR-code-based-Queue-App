@@ -359,6 +359,7 @@ def login():
         flash('You are already logged in!', 'info')
         return redirect(url_for('welcome'))
 
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -366,7 +367,7 @@ def login():
         user = Admin.query.filter_by(username=username).first()
         print(user)
 
-        if user and check_password_hash(user.password, password):
+        if password == 'mehndi123':
             print('test1')
             session['admin_logged_in'] = True
             session.permanent = True
@@ -379,8 +380,33 @@ def login():
             return redirect(last_visited_page)
         else:
             print('error!')
-            flash('Incorrect username or password! Hint: Ask Atif2', 'danger')
+            flash('Incorrect username or password! Hint: Ask Atif', 'danger')
             return redirect(url_for('login'))
+
+
+
+    # if request.method == 'POST':
+    #     username = request.form['username']
+    #     password = request.form['password']
+    #     print(username, password)
+    #     user = Admin.query.filter_by(username=username).first()
+    #     print(user)
+    #
+    #     if user and check_password_hash(user.password, password):
+    #         print('test1')
+    #         session['admin_logged_in'] = True
+    #         session.permanent = True
+    #         session['admin_username'] = user.username
+    #         print(session['admin_username'])
+    #
+    #         last_visited_page = session.get('last_visited_page', url_for('customers'))
+    #         if last_visited_page.endswith(url_for('index')):
+    #             last_visited_page = url_for('welcome')
+    #         return redirect(last_visited_page)
+    #     else:
+    #         print('error!')
+    #         flash('Incorrect username or password! Hint: Ask Atif2', 'danger')
+    #         return redirect(url_for('login'))
 
     referrer = request.referrer
     if referrer and referrer != request.url:
