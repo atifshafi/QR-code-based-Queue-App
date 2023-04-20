@@ -378,7 +378,8 @@ def login():
                 last_visited_page = url_for('welcome')
             return redirect(last_visited_page)
         else:
-            flash('Incorrect username or password! Hint: Ask Atif', 'danger')
+            print('error!')
+            flash('Incorrect username or password! Hint: Ask Atif2', 'danger')
             return redirect(url_for('login'))
 
     referrer = request.referrer
